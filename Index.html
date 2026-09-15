@@ -1,0 +1,2806 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>✦ LUMINA READER AI ULTRA — Next Generation ✦</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+:root {
+  --bg-0: #03050a;
+  --bg-1: #080c16;
+  --bg-2: #0f1422;
+  --bg-3: #181f30;
+  --surface: rgba(15, 20, 34, 0.65);
+  --surface-2: rgba(24, 31, 48, 0.9);
+  --border: rgba(120, 160, 255, 0.1);
+  --border-strong: rgba(120, 160, 255, 0.28);
+  --primary: #5ba4ff;
+  --primary-2: #3b82f6;
+  --primary-soft: rgba(91, 164, 255, 0.12);
+  --accent: #c084fc;
+  --accent-2: #ff6ce0;
+  --ai: #00e5c7;
+  --ai-2: #00b8ff;
+  --gold: #ffd166;
+  --success: #4ade80;
+  --warn: #fbbf24;
+  --danger: #f87171;
+  --text: #eef5ff;
+  --text-2: #a2b3d4;
+  --text-3: #5f7194;
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --shadow: 0 10px 30px -8px rgba(0,0,0,0.7);
+  --shadow-lg: 0 30px 70px -14px rgba(0,0,0,0.9);
+  --glow: 0 0 40px rgba(91, 164, 255, 0.4);
+  --glow-ai: 0 0 40px rgba(0, 229, 199, 0.5);
+  --glow-gold: 0 0 40px rgba(255, 209, 102, 0.4);
+  --transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1);
+  --transition-slow: all 0.5s cubic-bezier(0.2, 0.9, 0.4, 1);
+  --ease-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+[data-theme="light"] {
+  --bg-0: #f5f7fc;
+  --bg-1: #ffffff;
+  --bg-2: #f0f3fa;
+  --bg-3: #e4e9f5;
+  --surface: rgba(255, 255, 255, 0.85);
+  --surface-2: rgba(255, 255, 255, 0.96);
+  --border: rgba(60, 90, 160, 0.12);
+  --border-strong: rgba(60, 90, 160, 0.3);
+  --primary: #2563eb;
+  --primary-soft: rgba(37, 99, 235, 0.1);
+  --text: #0f1a30;
+  --text-2: #4a5878;
+  --text-3: #8a97b5;
+  --shadow: 0 10px 30px -8px rgba(30, 50, 100, 0.15);
+  --shadow-lg: 0 30px 70px -14px rgba(30, 50, 100, 0.22);
+}
+html, body { height: 100%; overflow: hidden; }
+body {
+  background: var(--bg-0);
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  transition: background 0.3s ease, color 0.3s ease;
+  cursor: default;
+}
+body.custom-cursor { cursor: none; }
+body.custom-cursor * { cursor: none !important; }
+
+/* ===== GENERATIVE BACKGROUND ===== */
+#bgCanvas {
+  position: fixed; inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.7;
+}
+.bg-noise-overlay {
+  position: fixed; inset: 0;
+  z-index: 1; pointer-events: none;
+  opacity: 0.03;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ===== CUSTOM CURSOR ===== */
+.cursor-dot, .cursor-ring {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.15s;
+}
+.cursor-dot {
+  width: 6px; height: 6px;
+  background: var(--ai);
+  box-shadow: var(--glow-ai);
+  transform: translate(-50%, -50%);
+}
+.cursor-ring {
+  width: 34px; height: 34px;
+  border: 1.5px solid var(--primary);
+  box-shadow: 0 0 20px rgba(91,164,255,0.4) inset, 0 0 20px rgba(91,164,255,0.4);
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s, transform 0.2s var(--ease-elastic), width 0.25s, height 0.25s, border-color 0.25s;
+}
+body.custom-cursor .cursor-dot, body.custom-cursor .cursor-ring { opacity: 1; }
+.cursor-ring.hover {
+  width: 56px; height: 56px;
+  border-color: var(--ai);
+  box-shadow: 0 0 30px var(--ai) inset, var(--glow-ai);
+}
+.cursor-ring.click { width: 24px; height: 24px; }
+
+/* ===== HEADER ===== */
+.header {
+  position: relative; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  background: var(--surface);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  gap: 1rem;
+  flex-shrink: 0;
+  height: 64px;
+}
+.header-left, .header-right { display: flex; align-items: center; gap: 0.6rem; }
+.header-left { flex: 1; min-width: 0; }
+
+.logo { display: flex; align-items: center; gap: 0.7rem; flex-shrink: 0; }
+.logo-icon {
+  width: 42px; height: 42px;
+  border-radius: 14px;
+  background: conic-gradient(from 0deg, var(--primary), var(--accent), var(--ai), var(--primary));
+  animation: rotateHue 8s linear infinite;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.15rem; color: #fff;
+  box-shadow: var(--glow);
+  position: relative;
+  transition: transform 0.4s var(--ease-elastic);
+}
+.logo-icon:hover { transform: scale(1.1) rotate(15deg); }
+.logo-icon::after {
+  content: '';
+  position: absolute; inset: -4px;
+  border-radius: 18px;
+  background: inherit;
+  filter: blur(16px); opacity: 0.6; z-index: -1;
+}
+@keyframes rotateHue { to { filter: hue-rotate(360deg); } }
+.logo h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.1rem; font-weight: 700;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--text), var(--primary), var(--ai));
+  background-size: 200% 200%;
+  animation: gradientMove 5s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  white-space: nowrap;
+  line-height: 1;
+}
+.logo h1 span {
+  -webkit-text-fill-color: var(--text-3);
+  font-weight: 500; font-size: 0.6rem;
+  display: block; letter-spacing: 0.25em; margin-top: 2px;
+  font-family: 'Inter', sans-serif;
+}
+.logo h1 span::before { content: '⚡ '; color: var(--ai); }
+@keyframes gradientMove { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+.search-box {
+  flex: 1; max-width: 340px;
+  position: relative; display: flex; align-items: center;
+}
+.search-box i { position: absolute; left: 13px; color: var(--text-3); font-size: 0.85rem; pointer-events: none; }
+.search-box input {
+  width: 100%;
+  padding: 0.55rem 0.9rem 0.55rem 2.4rem;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text); font-size: 0.85rem;
+  font-family: inherit; outline: none;
+  transition: var(--transition);
+}
+.search-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 0.85rem; font-weight: 500;
+  font-family: inherit; cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap; user-select: none;
+  position: relative; overflow: hidden;
+}
+.btn:hover {
+  background: var(--bg-3); border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+.btn:active { transform: translateY(0) scale(0.98); }
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  border-color: transparent; color: #fff;
+  box-shadow: 0 6px 20px -6px var(--primary);
+}
+.btn-primary:hover { box-shadow: 0 8px 28px -6px var(--primary); }
+.btn-ai {
+  background: linear-gradient(135deg, var(--ai), var(--ai-2));
+  border-color: transparent; color: #001a16;
+  box-shadow: var(--glow-ai);
+}
+.btn-ai:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(0,229,199,0.8); }
+.btn-icon { width: 40px; height: 40px; padding: 0; border-radius: 12px; flex-shrink: 0; }
+.btn-icon.btn-sm { width: 34px; height: 34px; font-size: 0.82rem; border-radius: 10px; }
+.btn-icon.active { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: 0 0 20px var(--primary); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; }
+#fileInput { display: none; }
+
+/* Ripple */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.5);
+  transform: scale(0);
+  animation: rippleAnim 0.6s ease-out;
+  pointer-events: none;
+}
+@keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
+
+/* ===== APP ===== */
+.app { display: flex; flex: 1; min-height: 0; position: relative; z-index: 5; }
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 320px;
+  background: var(--surface);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  transition: var(--transition);
+  flex-shrink: 0; overflow: hidden;
+}
+.sidebar.collapsed { width: 0; border-right: none; }
+
+.tabs {
+  display: flex; padding: 0.5rem; gap: 0.2rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.tab {
+  flex: 1; padding: 0.55rem 0.3rem;
+  background: transparent; border: none;
+  border-radius: 10px;
+  color: var(--text-3);
+  font-size: 0.72rem; font-weight: 600;
+  font-family: inherit; cursor: pointer;
+  transition: var(--transition);
+  display: flex; align-items: center; justify-content: center; gap: 0.3rem;
+  position: relative;
+}
+.tab:hover { color: var(--text); background: var(--bg-2); }
+.tab.active { color: var(--primary); background: var(--primary-soft); }
+.tab.active::after {
+  content: ''; position: absolute;
+  bottom: -0.5rem; left: 50%; transform: translateX(-50%);
+  width: 20px; height: 2px;
+  background: var(--primary);
+  border-radius: 2px;
+  box-shadow: 0 0 10px var(--primary);
+}
+.tab-panel {
+  flex: 1; overflow-y: auto; padding: 0.85rem;
+  display: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+  animation: fadeIn 0.3s ease;
+}
+.tab-panel.active { display: block; }
+.tab-panel::-webkit-scrollbar { width: 6px; }
+.tab-panel::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; }
+
+.collection-group {
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-2);
+  transition: var(--transition);
+}
+.collection-group:hover { border-color: var(--border-strong); }
+.collection-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.7rem 0.85rem;
+  background: linear-gradient(135deg, var(--bg-3), var(--bg-2));
+  cursor: pointer; transition: var(--transition);
+  border-bottom: 1px solid var(--border);
+}
+.collection-header:hover { background: var(--primary-soft); }
+.collection-title {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.82rem; font-weight: 600;
+  flex: 1; min-width: 0;
+}
+.collection-title i { color: var(--accent); }
+.collection-title span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.collection-count {
+  font-size: 0.68rem; color: var(--text-3);
+  background: var(--bg-1); padding: 2px 8px; border-radius: 10px;
+}
+.collection-body { padding: 0.5rem; display: none; }
+.collection-group.open .collection-body { display: block; }
+.collection-group.open .fa-chevron-down { transform: rotate(180deg); }
+.collection-header .fa-chevron-down { transition: transform 0.3s; font-size: 0.7rem; color: var(--text-3); }
+
+.lib-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.65rem;
+  display: flex; gap: 0.65rem;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-bottom: 0.45rem;
+  position: relative;
+  overflow: hidden;
+}
+.lib-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, transparent, rgba(91,164,255,0.05));
+  opacity: 0; transition: opacity 0.3s;
+  pointer-events: none;
+}
+.lib-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+.lib-card:hover::before { opacity: 1; }
+.lib-card.active {
+  border-color: var(--primary);
+  background: linear-gradient(145deg, var(--bg-2), var(--primary-soft));
+  box-shadow: 0 0 25px rgba(91,164,255,0.28);
+}
+.lib-card.dragging { opacity: 0.5; transform: scale(0.95); }
+.lib-thumb {
+  width: 52px; height: 70px;
+  border-radius: 10px; overflow: hidden;
+  background: var(--bg-3);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-3); font-size: 1.2rem;
+  position: relative;
+  transition: transform 0.3s var(--ease-elastic);
+}
+.lib-card:hover .lib-thumb { transform: scale(1.05) rotate(-2deg); }
+.lib-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.lib-thumb .pdf-badge {
+  position: absolute; bottom: 2px; right: 2px;
+  background: linear-gradient(135deg, var(--danger), #dc2626);
+  color: #fff; font-size: 0.5rem; padding: 1px 4px;
+  border-radius: 4px; font-weight: 700; letter-spacing: 0.5px;
+  box-shadow: 0 0 10px rgba(248,113,113,0.6);
+}
+.lib-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 0.2rem; }
+.lib-title {
+  font-size: 0.8rem; font-weight: 600; color: var(--text);
+  overflow: hidden; text-overflow: ellipsis;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  line-height: 1.3;
+}
+.lib-meta { font-size: 0.68rem; color: var(--text-3); display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
+.lib-progress {
+  position: absolute; left: 0; bottom: 0; height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--ai), var(--accent));
+  background-size: 200% 100%;
+  animation: gradientMove 3s ease infinite;
+  border-radius: 0 3px 3px 0;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10px var(--primary);
+}
+.lib-delete, .lib-more {
+  position: absolute; top: 5px;
+  width: 24px; height: 24px; border-radius: 7px;
+  background: rgba(0,0,0,0.5); border: none;
+  cursor: pointer; display: none;
+  align-items: center; justify-content: center;
+  font-size: 0.68rem; transition: var(--transition);
+  z-index: 2;
+}
+.lib-delete { right: 5px; color: var(--danger); }
+.lib-more { right: 32px; color: var(--text-2); }
+.lib-card:hover .lib-delete, .lib-card:hover .lib-more { display: flex; }
+.lib-delete:hover { background: var(--danger); color: #fff; }
+.lib-more:hover { background: var(--primary); color: #fff; }
+
+.thumb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.45rem; }
+.thumb-card {
+  background: var(--bg-2); border: 2px solid var(--border);
+  border-radius: 10px; overflow: hidden; cursor: pointer;
+  transition: var(--transition);
+  position: relative; aspect-ratio: 3/4;
+}
+.thumb-card:hover { border-color: var(--primary); transform: scale(1.05); z-index: 2; }
+.thumb-card.active {
+  border-color: var(--primary);
+  box-shadow: 0 0 25px rgba(91,164,255,0.6);
+  transform: scale(1.03);
+}
+.thumb-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb-num {
+  position: absolute; bottom: 4px; left: 4px;
+  background: rgba(0,0,0,0.75); color: #fff;
+  padding: 1px 6px; border-radius: 6px;
+  font-size: 0.62rem; font-weight: 600;
+  backdrop-filter: blur(10px);
+}
+.thumb-bookmark {
+  position: absolute; top: 4px; right: 4px;
+  width: 22px; height: 22px; border-radius: 6px;
+  background: rgba(0,0,0,0.65); color: var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.62rem;
+  box-shadow: 0 0 10px rgba(255,209,102,0.5);
+}
+
+.empty-hint { text-align: center; padding: 2.5rem 1rem; color: var(--text-3); font-size: 0.82rem; }
+.empty-hint i {
+  font-size: 2.4rem; opacity: 0.4; margin-bottom: 0.75rem; display: block;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+
+/* ===== VIEWER ===== */
+.viewer { flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--bg-0); position: relative; }
+.viewer-body {
+  flex: 1; overflow: auto; position: relative; display: flex;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+.viewer-body::-webkit-scrollbar { width: 8px; height: 8px; }
+.viewer-body::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; }
+.viewer-body.mode-single { align-items: center; justify-content: center; padding: 1.2rem; }
+.viewer-body.mode-double { align-items: center; justify-content: center; padding: 1.2rem; }
+.viewer-body.mode-scroll { align-items: flex-start; justify-content: center; padding: 1rem 0; flex-direction: column; gap: 1rem; }
+
+.page-img {
+  display: block;
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  transition: transform 0.25s ease, filter 0.3s;
+  transform-origin: center center;
+  background: var(--bg-1);
+  user-select: none;
+  animation: pageEnter 0.5s var(--ease-elastic);
+}
+@keyframes pageEnter {
+  from { opacity: 0; transform: scale(0.95) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.mode-single .page-img { max-width: 100%; max-height: 100%; width: auto; height: auto; }
+.mode-double .page-img { max-width: calc(50% - 0.5rem); max-height: 100%; }
+.mode-scroll .page-img { max-width: min(1100px, 95%); width: auto; margin: 0 auto; cursor: default; }
+.double-wrapper { display: flex; gap: 1rem; align-items: center; justify-content: center; max-width: 100%; max-height: 100%; }
+.double-wrapper .page-img { max-height: 100%; max-width: 100%; }
+
+.page-img.ai-focus { filter: contrast(1.08) saturate(1.1) brightness(1.02); }
+.viewer-body.ai-active::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,0.65) 100%);
+  pointer-events: none; z-index: 10;
+  animation: fadeIn 0.4s ease;
+}
+
+/* Heatmap overlay */
+.heatmap-overlay {
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 11;
+  mix-blend-mode: screen; opacity: 0.6;
+}
+.heatmap-overlay canvas { width: 100%; height: 100%; }
+
+/* ===== MINI MAP ===== */
+.minimap {
+  position: absolute; right: 12px; top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  max-height: 60%;
+  background: var(--bg-2);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  z-index: 15;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.minimap:hover { width: 14px; }
+.minimap-viewport {
+  position: absolute; left: 0; right: 0;
+  background: linear-gradient(180deg, var(--primary), var(--ai));
+  border-radius: 10px;
+  box-shadow: 0 0 15px var(--primary);
+  transition: top 0.2s ease, height 0.2s ease;
+  min-height: 20px;
+}
+.minimap-mark {
+  position: absolute; right: 1px;
+  width: 4px; height: 2px;
+  background: var(--gold);
+  box-shadow: 0 0 6px var(--gold);
+  border-radius: 2px;
+}
+
+/* ===== BOTTOM BAR ===== */
+.bottom-bar {
+  background: var(--surface);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border-top: 1px solid var(--border);
+  padding: 0.6rem 1.2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 0.7rem; flex-shrink: 0; flex-wrap: wrap;
+}
+.bb-group { display: flex; align-items: center; gap: 0.3rem; }
+.page-slider { flex: 1; max-width: 400px; min-width: 120px; display: flex; align-items: center; gap: 0.7rem; }
+.slider {
+  flex: 1; -webkit-appearance: none; appearance: none;
+  height: 6px; border-radius: 3px;
+  background: var(--bg-3); outline: none; cursor: pointer;
+  transition: var(--transition);
+}
+.slider:hover { background: var(--bg-2); }
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--ai));
+  cursor: pointer; box-shadow: 0 0 15px var(--primary);
+  border: 2px solid var(--bg-1);
+  transition: transform 0.15s var(--ease-elastic);
+}
+.slider::-webkit-slider-thumb:hover { transform: scale(1.3); }
+.slider::-moz-range-thumb {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--primary); cursor: pointer;
+  border: 2px solid var(--bg-1);
+}
+
+.page-badge {
+  background: var(--bg-2); border: 1px solid var(--border);
+  padding: 0.35rem 0.85rem; border-radius: 30px;
+  font-size: 0.78rem; font-weight: 600; color: var(--text);
+  min-width: 85px; text-align: center; font-variant-numeric: tabular-nums;
+  font-family: 'JetBrains Mono', monospace;
+}
+.page-badge .cur { color: var(--primary); }
+.page-badge .sep { color: var(--text-3); margin: 0 3px; }
+.page-badge .tot { color: var(--text-2); }
+.zoom-display {
+  font-size: 0.78rem; color: var(--text-2);
+  min-width: 42px; text-align: center; font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== EMPTY ===== */
+.empty-state {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 2rem; text-align: center; gap: 1.2rem;
+}
+.icon-hero {
+  width: 120px; height: 120px;
+  border-radius: 36px;
+  background: conic-gradient(from 0deg, var(--primary), var(--accent), var(--ai), var(--primary));
+  animation: rotateHue 6s linear infinite, float 4s ease-in-out infinite;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; color: #fff;
+  box-shadow: 0 25px 70px -12px var(--primary), var(--glow-ai);
+  position: relative;
+}
+.icon-hero::before {
+  content: '';
+  position: absolute; inset: -8px;
+  border-radius: 42px;
+  background: inherit;
+  filter: blur(25px); opacity: 0.5; z-index: -1;
+  animation: rotateHue 6s linear infinite;
+}
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+.empty-state h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.6rem; font-weight: 700;
+  background: linear-gradient(135deg, var(--text), var(--primary), var(--ai));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.empty-state p { color: var(--text-2); font-size: 0.9rem; max-width: 520px; line-height: 1.6; }
+.empty-formats { display: flex; gap: 0.45rem; flex-wrap: wrap; justify-content: center; margin-top: 0.5rem; }
+.format-chip {
+  padding: 0.4rem 0.9rem;
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: 30px; font-size: 0.72rem; font-weight: 600;
+  color: var(--text-2); letter-spacing: 0.04em;
+  display: flex; align-items: center; gap: 0.35rem;
+  transition: var(--transition);
+}
+.format-chip:hover {
+  border-color: var(--primary);
+  color: var(--text);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px -5px var(--primary);
+}
+.format-chip i { color: var(--ai); }
+
+/* ===== MODALS ===== */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 1000;
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.25s ease;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: var(--bg-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 1.6rem;
+  max-width: 520px; width: 100%;
+  box-shadow: var(--shadow-lg);
+  max-height: 85vh; overflow-y: auto;
+  position: relative;
+  animation: modalIn 0.35s var(--ease-elastic);
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.92) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal::before {
+  content: '';
+  position: absolute; inset: -1px;
+  border-radius: var(--radius-lg);
+  padding: 1px;
+  background: linear-gradient(135deg, var(--primary), var(--ai), var(--accent));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.4;
+  pointer-events: none;
+}
+.modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.1rem;
+}
+.modal-head h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.1rem; font-weight: 700;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.modal-head h3 i { color: var(--ai); }
+.modal-close {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: var(--bg-2); border: 1px solid var(--border);
+  color: var(--text-2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: var(--transition);
+}
+.modal-close:hover { background: var(--danger); color: #fff; transform: rotate(90deg); }
+
+/* AI Chat */
+.ai-chat { display: flex; flex-direction: column; gap: 0.65rem; max-height: 380px; overflow-y: auto; padding-right: 4px; }
+.ai-msg {
+  padding: 0.7rem 0.95rem;
+  border-radius: 14px;
+  font-size: 0.85rem; line-height: 1.5;
+  max-width: 88%;
+  animation: fadeIn 0.3s ease;
+}
+.ai-msg.user {
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  color: #fff; margin-left: auto;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 5px 20px -5px var(--primary);
+}
+.ai-msg.bot {
+  background: var(--bg-2); color: var(--text);
+  border: 1px solid var(--border);
+  border-bottom-left-radius: 4px;
+}
+.ai-msg.bot::before { content: '🧠 '; margin-right: 0.3rem; }
+.ai-input-row { display: flex; gap: 0.5rem; margin-top: 1rem; }
+.ai-input-row input {
+  flex: 1;
+  padding: 0.65rem 0.95rem;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text); font-family: inherit; font-size: 0.85rem;
+  outline: none; transition: var(--transition);
+}
+.ai-input-row input:focus { border-color: var(--ai); box-shadow: 0 0 0 3px rgba(0,229,199,0.15); }
+
+/* Sound */
+.sound-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.55rem;
+  margin-bottom: 1rem;
+}
+.sound-btn {
+  aspect-ratio: 1;
+  background: var(--bg-2);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text); cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.35rem; font-size: 0.7rem; font-family: inherit; font-weight: 600;
+  transition: var(--transition);
+  padding: 0.5rem; position: relative; overflow: hidden;
+}
+.sound-btn i { font-size: 1.3rem; color: var(--text-2); transition: var(--transition); }
+.sound-btn:hover { transform: translateY(-3px) scale(1.03); border-color: var(--primary); }
+.sound-btn:hover i { color: var(--primary); transform: scale(1.1); }
+.sound-btn.active {
+  border-color: var(--ai);
+  background: linear-gradient(145deg, var(--bg-2), rgba(0,229,199,0.15));
+  box-shadow: var(--glow-ai);
+}
+.sound-btn.active i { color: var(--ai); animation: pulseIcon 1.5s ease-in-out infinite; }
+@keyframes pulseIcon {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+.volume-row {
+  display: flex; align-items: center; gap: 0.7rem;
+  padding: 0.6rem 0; border-top: 1px solid var(--border);
+}
+.volume-row label { font-size: 0.82rem; color: var(--text-2); min-width: 75px; display: flex; align-items: center; gap: 0.35rem; }
+.volume-row .slider { flex: 1; }
+.volume-row select {
+  flex: 1; padding: 0.5rem 0.7rem;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text); font-family: inherit; font-size: 0.85rem;
+  outline: none;
+}
+
+/* Sound visualizer */
+.sound-viz {
+  height: 40px;
+  display: flex; align-items: flex-end; justify-content: center;
+  gap: 3px; margin-top: 0.5rem;
+}
+.sound-viz-bar {
+  width: 4px;
+  background: linear-gradient(to top, var(--ai), var(--primary));
+  border-radius: 2px;
+  animation: vizBar 1s ease-in-out infinite;
+  min-height: 4px;
+}
+@keyframes vizBar {
+  0%, 100% { height: 20%; }
+  50% { height: 100%; }
+}
+
+/* Keyboard */
+.kbd-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.82rem; color: var(--text-2);
+}
+.kbd-row:last-child { border-bottom: none; }
+.kbd {
+  display: inline-block;
+  background: var(--bg-3);
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  padding: 0.15rem 0.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.68rem; color: var(--text);
+  min-width: 24px; text-align: center;
+}
+
+/* ===== COMMAND PALETTE ===== */
+.cmd-palette {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(16px);
+  z-index: 2000;
+  display: none;
+  align-items: flex-start; justify-content: center;
+  padding-top: 15vh;
+}
+.cmd-palette.active { display: flex; }
+.cmd-box {
+  width: 100%; max-width: 560px;
+  background: var(--bg-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: modalIn 0.3s var(--ease-elastic);
+}
+.cmd-search {
+  display: flex; align-items: center;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--border);
+  gap: 0.7rem;
+}
+.cmd-search i { color: var(--ai); font-size: 1rem; }
+.cmd-search input {
+  flex: 1; background: transparent; border: none;
+  color: var(--text); font-size: 1rem;
+  font-family: inherit; outline: none;
+}
+.cmd-results { max-height: 400px; overflow-y: auto; padding: 0.4rem; }
+.cmd-item {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 0.88rem;
+}
+.cmd-item:hover, .cmd-item.selected {
+  background: var(--primary-soft);
+  color: var(--text);
+}
+.cmd-item i {
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--primary); font-size: 0.85rem;
+}
+.cmd-item .cmd-shortcut {
+  margin-left: auto; font-size: 0.7rem; color: var(--text-3);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ===== TOAST ===== */
+.toast-stack {
+  position: fixed; bottom: 24px; right: 24px;
+  z-index: 3000; display: flex; flex-direction: column; gap: 0.5rem;
+  pointer-events: none; max-width: 380px;
+}
+.toast {
+  background: var(--surface-2);
+  backdrop-filter: blur(24px);
+  padding: 0.75rem 1.1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+  color: var(--text); font-size: 0.83rem; font-weight: 500;
+  display: flex; align-items: center; gap: 0.6rem;
+  box-shadow: var(--shadow-lg);
+  transform: translateX(150%); opacity: 0;
+  transition: all 0.45s var(--ease-elastic);
+  pointer-events: auto;
+  position: relative;
+  overflow: hidden;
+}
+.toast::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--primary), var(--ai));
+}
+.toast.show { transform: translateX(0); opacity: 1; }
+.toast i { font-size: 1.05rem; flex-shrink: 0; }
+.toast.success { border-color: rgba(74, 222, 128, 0.5); }
+.toast.success i { color: var(--success); }
+.toast.warn { border-color: rgba(251, 191, 36, 0.5); }
+.toast.warn i { color: var(--warn); }
+.toast.error { border-color: rgba(248, 113, 113, 0.5); }
+.toast.error i { color: var(--danger); }
+.toast.info { border-color: var(--primary-soft); }
+.toast.info i { color: var(--primary); }
+.toast.ai { border-color: rgba(0, 229, 199, 0.5); }
+.toast.ai i { color: var(--ai); }
+
+/* ===== LOADER ===== */
+.loader {
+  width: 40px; height: 40px;
+  border: 3px solid transparent;
+  border-top-color: var(--primary);
+  border-right-color: var(--ai);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.loading-overlay {
+  position: absolute; inset: 0;
+  background: rgba(3, 5, 10, 0.88);
+  backdrop-filter: blur(12px);
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 1rem; z-index: 100;
+}
+.loading-overlay.active { display: flex; }
+.loading-text { color: var(--text-2); font-size: 0.88rem; font-family: 'JetBrains Mono', monospace; }
+
+/* ===== AI PROCESSING INDICATOR ===== */
+.ai-processing {
+  position: absolute; top: 12px; right: 12px;
+  background: linear-gradient(135deg, var(--ai), var(--ai-2));
+  color: #001a16;
+  padding: 0.45rem 0.85rem;
+  border-radius: 30px;
+  font-size: 0.72rem; font-weight: 700;
+  display: none; align-items: center; gap: 0.4rem;
+  box-shadow: var(--glow-ai);
+  z-index: 20;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+.ai-processing.active { display: flex; }
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+/* ===== MOBILE ===== */
+@media (max-width: 900px) {
+  .search-box { display: none; }
+  .header { padding: 0.6rem 0.9rem; height: 58px; }
+  .sidebar { position: absolute; top: 0; left: 0; bottom: 0; z-index: 100; box-shadow: var(--shadow-lg); }
+  .logo h1 { font-size: 0.95rem; }
+  .logo h1 span { display: none; }
+  .hide-mobile { display: none; }
+}
+.mobile-toggle { display: none; }
+@media (max-width: 900px) { .mobile-toggle { display: inline-flex; } }
+
+::selection { background: var(--primary); color: #fff; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+</style>
+</head>
+<body data-theme="dark">
+
+<canvas id="bgCanvas"></canvas>
+<div class="bg-noise-overlay"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <button class="btn btn-icon mobile-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+    <div class="logo">
+      <div class="logo-icon"><i class="fas fa-book-open"></i></div>
+      <h1>LUMINA READER<span>AI ULTRA</span></h1>
+    </div>
+  </div>
+
+  <div class="search-box">
+    <i class="fas fa-search"></i>
+    <input type="text" id="searchInput" placeholder="Tìm truyện, trang... (Ctrl+K)">
+  </div>
+
+  <div class="header-right">
+    <button class="btn btn-icon" id="aiBtn" title="AI Assistant (A)"><i class="fas fa-robot"></i></button>
+    <button class="btn btn-icon" id="soundBtn" title="Âm thanh (S)"><i class="fas fa-headphones"></i></button>
+    <button class="btn btn-icon" id="helpBtn" title="Phím tắt (?)"><i class="fas fa-keyboard"></i></button>
+    <button class="btn btn-icon" id="themeBtn" title="Theme"><i class="fas fa-moon"></i></button>
+    <label for="fileInput" class="btn btn-primary">
+      <i class="fas fa-folder-open"></i> <span class="hide-mobile">Mở</span>
+    </label>
+    <input type="file" id="fileInput" accept=".cbz,.zip,.pdf,.epub" multiple>
+  </div>
+</header>
+
+<!-- APP -->
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="tabs">
+      <button class="tab active" data-tab="library"><i class="fas fa-layer-group"></i> Thư viện</button>
+      <button class="tab" data-tab="pages"><i class="fas fa-images"></i> Trang</button>
+      <button class="tab" data-tab="bookmarks"><i class="fas fa-bookmark"></i> Đánh dấu</button>
+    </div>
+
+    <div class="tab-panel active" id="panel-library">
+      <div style="display:flex; gap:0.35rem; margin-bottom:0.75rem;">
+        <button class="btn" id="newCollectionBtn" style="flex:1; font-size:0.72rem; padding:0.45rem;">
+          <i class="fas fa-folder-plus"></i> Nhóm mới
+        </button>
+        <button class="btn btn-icon btn-sm" id="statsBtn" title="Thống kê"><i class="fas fa-chart-line"></i></button>
+      </div>
+      <div id="libraryList"></div>
+    </div>
+
+    <div class="tab-panel" id="panel-pages">
+      <div class="thumb-grid" id="thumbGrid">
+        <div class="empty-hint"><i class="fas fa-images"></i>Chưa có trang</div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-bookmarks">
+      <div id="bookmarkList"></div>
+    </div>
+  </aside>
+
+  <!-- VIEWER -->
+  <main class="viewer" id="viewer">
+    <div class="ai-processing" id="aiProcessing">
+      <i class="fas fa-circle-notch fa-spin"></i> <span id="aiProcessingText">AI đang xử lý...</span>
+    </div>
+
+    <div class="viewer-body mode-single" id="viewerBody">
+      <div class="empty-state" id="emptyState">
+        <div class="icon-hero"><i class="fas fa-book-reader"></i></div>
+        <h2>Lumina Reader AI ULTRA</h2>
+        <p>Trình đọc truyện tranh thế hệ mới với AI thực sự, hiệu ứng holographic, command palette, mini-map, heatmap đọc, generative background và nhiều tính năng đột phá. Nhấn <kbd class="kbd">Ctrl+K</kbd> để mở command palette.</p>
+        <div class="empty-formats">
+          <span class="format-chip"><i class="fas fa-file-archive"></i> CBZ</span>
+          <span class="format-chip"><i class="fas fa-file-pdf"></i> PDF</span>
+          <span class="format-chip"><i class="fas fa-book"></i> EPUB</span>
+          <span class="format-chip"><i class="fas fa-brain"></i> AI Vision</span>
+          <span class="format-chip"><i class="fas fa-headphones"></i> 9 Sounds</span>
+          <span class="format-chip"><i class="fas fa-command"></i> Cmd Palette</span>
+          <span class="format-chip"><i class="fas fa-chart-area"></i> Heatmap</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MINIMAP -->
+    <div class="minimap" id="minimap" style="display:none;">
+      <div class="minimap-viewport" id="minimapViewport"></div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="loader"></div>
+      <div class="loading-text" id="loadingText">Đang tải...</div>
+    </div>
+
+    <!-- BOTTOM BAR -->
+    <div class="bottom-bar">
+      <div class="bb-group">
+        <button class="btn btn-icon btn-sm" id="prevBtn" title="Trang trước (←)"><i class="fas fa-chevron-left"></i></button>
+        <button class="btn btn-icon btn-sm" id="nextBtn" title="Trang sau (→)"><i class="fas fa-chevron-right"></i></button>
+      </div>
+
+      <div class="page-slider">
+        <span class="page-badge">
+          <span class="cur" id="curPage">0</span><span class="sep">/</span><span class="tot" id="totPage">0</span>
+        </span>
+        <input type="range" class="slider" id="pageSlider" min="0" max="0" value="0">
+      </div>
+
+      <div class="bb-group">
+        <button class="btn btn-icon btn-sm active" id="modeSingle" title="Đơn (1)"><i class="fas fa-square"></i></button>
+        <button class="btn btn-icon btn-sm" id="modeDouble" title="Đôi (2)"><i class="fas fa-clone"></i></button>
+        <button class="btn btn-icon btn-sm" id="modeScroll" title="Cuộn (3)"><i class="fas fa-bars"></i></button>
+        <button class="btn btn-icon btn-sm" id="modeFocus" title="AI Focus (4)"><i class="fas fa-brain"></i></button>
+        <button class="btn btn-icon btn-sm" id="autoScrollBtn" title="Auto scroll (5)"><i class="fas fa-play"></i></button>
+        <button class="btn btn-icon btn-sm" id="heatmapBtn" title="Heatmap (H)"><i class="fas fa-fire"></i></button>
+        <button class="btn btn-icon btn-sm" id="bookmarkBtn" title="Đánh dấu (B)"><i class="far fa-bookmark"></i></button>
+        <button class="btn btn-icon btn-sm" id="zoomOutBtn" title="Thu nhỏ (-)"><i class="fas fa-minus"></i></button>
+        <span class="zoom-display" id="zoomDisplay">100%</span>
+        <button class="btn btn-icon btn-sm" id="zoomInBtn" title="Phóng to (+)"><i class="fas fa-plus"></i></button>
+        <button class="btn btn-icon btn-sm" id="fitBtn" title="Vừa khung (0)"><i class="fas fa-expand"></i></button>
+        <button class="btn btn-icon btn-sm" id="fsBtn" title="Fullscreen (F)"><i class="fas fa-arrows-alt"></i></button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- COMMAND PALETTE -->
+<div class="cmd-palette" id="cmdPalette">
+  <div class="cmd-box">
+    <div class="cmd-search">
+      <i class="fas fa-command"></i>
+      <input type="text" id="cmdInput" placeholder="Gõ lệnh... (VD: đọc, âm thanh, theme, fullscreen)">
+    </div>
+    <div class="cmd-results" id="cmdResults"></div>
+  </div>
+</div>
+
+<!-- AI MODAL -->
+<div class="modal-overlay" id="aiModal">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-head">
+      <h3><i class="fas fa-robot"></i> AI Assistant Ultra</h3>
+      <button class="modal-close" data-close="aiModal"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="ai-chat" id="aiChat">
+      <div class="ai-msg bot">Xin chào! Tôi là AI Ultra của Lumina Reader. Tôi có thể:
+- **Phân tích ảnh truyện** bằng Computer Vision
+- Tóm tắt, gợi ý, thống kê
+- Đọc thành tiếng (TTS) với giọng Việt
+- Nhận diện giọng nói của bạn
+- Trả lời mọi câu hỏi về truyện
+
+Hãy hỏi tôi hoặc nhấn micro để nói!</div>
+    </div>
+    <div class="ai-input-row">
+      <input type="text" id="aiInput" placeholder="Hỏi AI...">
+      <button class="btn btn-ai" id="aiSend"><i class="fas fa-paper-plane"></i></button>
+      <button class="btn btn-icon" id="aiVoice" title="Nói"><i class="fas fa-microphone"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- SOUND MODAL -->
+<div class="modal-overlay" id="soundModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3><i class="fas fa-headphones"></i> Âm thanh thư giãn</h3>
+      <button class="modal-close" data-close="soundModal"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="sound-grid">
+      <button class="sound-btn" data-sound="white"><i class="fas fa-signal"></i> White</button>
+      <button class="sound-btn" data-sound="pink"><i class="fas fa-wave-square"></i> Pink</button>
+      <button class="sound-btn" data-sound="brown"><i class="fas fa-water"></i> Brown</button>
+      <button class="sound-btn" data-sound="rain"><i class="fas fa-cloud-rain"></i> Mưa</button>
+      <button class="sound-btn" data-sound="cafe"><i class="fas fa-mug-hot"></i> Cafe</button>
+      <button class="sound-btn" data-sound="ocean"><i class="fas fa-umbrella-beach"></i> Biển</button>
+      <button class="sound-btn" data-sound="forest"><i class="fas fa-tree"></i> Rừng</button>
+      <button class="sound-btn" data-sound="fire"><i class="fas fa-fire"></i> Lửa</button>
+      <button class="sound-btn" data-sound="off"><i class="fas fa-volume-mute"></i> Tắt</button>
+    </div>
+    <div class="sound-viz" id="soundViz"></div>
+    <div class="volume-row">
+      <label><i class="fas fa-volume-up"></i> Âm lượng</label>
+      <input type="range" class="slider" id="volumeSlider" min="0" max="100" value="50">
+      <span id="volumeValue" style="min-width:40px;text-align:right;font-size:0.78rem;color:var(--text-2);font-family:'JetBrains Mono',monospace;">50%</span>
+    </div>
+    <div class="volume-row">
+      <label><i class="fas fa-timer"></i> Hẹn giờ</label>
+      <select id="sleepTimer">
+        <option value="0">Không</option>
+        <option value="15">15 phút</option>
+        <option value="30">30 phút</option>
+        <option value="60">60 phút</option>
+        <option value="120">2 giờ</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- HELP MODAL -->
+<div class="modal-overlay" id="helpModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3><i class="fas fa-keyboard"></i> Phím tắt Ultra</h3>
+      <button class="modal-close" data-close="helpModal"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="kbd-row"><span>Command Palette</span><span><span class="kbd">Ctrl</span>+<span class="kbd">K</span></span></div>
+    <div class="kbd-row"><span>Trang trước / sau</span><span><span class="kbd">←</span> <span class="kbd">→</span></span></div>
+    <div class="kbd-row"><span>Trang đầu / cuối</span><span><span class="kbd">Home</span> <span class="kbd">End</span></span></div>
+    <div class="kbd-row"><span>Phóng to / thu nhỏ</span><span><span class="kbd">+</span> <span class="kbd">-</span></span></div>
+    <div class="kbd-row"><span>Vừa khung</span><span class="kbd">0</span></div>
+    <div class="kbd-row"><span>Đánh dấu</span><span class="kbd">B</span></div>
+    <div class="kbd-row"><span>Chế độ Đơn/Đôi/Scroll/Focus</span><span><span class="kbd">1</span> <span class="kbd">2</span> <span class="kbd">3</span> <span class="kbd">4</span></span></div>
+    <div class="kbd-row"><span>Auto scroll</span><span class="kbd">5</span></div>
+    <div class="kbd-row"><span>Heatmap</span><span class="kbd">H</span></div>
+    <div class="kbd-row"><span>Toàn màn hình</span><span class="kbd">F</span></div>
+    <div class="kbd-row"><span>AI Assistant</span><span class="kbd">A</span></div>
+    <div class="kbd-row"><span>Âm thanh</span><span class="kbd">S</span></div>
+    <div class="kbd-row"><span>Đọc to (TTS)</span><span class="kbd">T</span></div>
+    <div class="kbd-row"><span>AI Vision (phân tích ảnh)</span><span class="kbd">V</span></div>
+    <div class="kbd-row"><span>Cursor tùy biến</span><span class="kbd">C</span></div>
+    <div class="kbd-row"><span>Trợ giúp</span><span class="kbd">?</span></div>
+  </div>
+</div>
+
+<!-- COLLECTION MODAL -->
+<div class="modal-overlay" id="collectionModal">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-head">
+      <h3><i class="fas fa-folder-tree"></i> Tạo nhóm truyện</h3>
+      <button class="modal-close" data-close="collectionModal"><i class="fas fa-times"></i></button>
+    </div>
+    <input type="text" id="collectionNameInput" placeholder="Tên nhóm..." style="width:100%;padding:0.7rem 1rem;background:var(--bg-2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:inherit;font-size:0.9rem;outline:none;margin-bottom:1rem;">
+    <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+      <button class="btn" data-close="collectionModal">Hủy</button>
+      <button class="btn btn-primary" id="collectionCreate">Tạo</button>
+    </div>
+  </div>
+</div>
+
+<!-- STATS MODAL -->
+<div class="modal-overlay" id="statsModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3><i class="fas fa-chart-line"></i> Thống kê đọc</h3>
+      <button class="modal-close" data-close="statsModal"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="statsContent"></div>
+  </div>
+</div>
+
+<!-- TOAST STACK -->
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ================ STATE ================
+  const state = {
+    library: [],
+    collections: [],
+    currentBook: null,
+    currentPage: 0,
+    zoom: 100,
+    fitMode: 'auto',
+    readingMode: 'single',
+    pdfDoc: null,
+    searchQuery: '',
+    audioContext: null,
+    soundSource: null,
+    soundGain: null,
+    soundType: 'off',
+    sleepTimer: null,
+    aiChat: [],
+    voiceRecognition: null,
+    autoScroll: false,
+    autoScrollSpeed: 1,
+    heatmapOn: false,
+    customCursor: true,
+    pageHeatmap: {}, // {pageIdx: dwellTime}
+    stats: { totalReadingTime: 0, pagesRead: 0, sessionsCount: 0, lastSession: 0 },
+  };
+
+  const DB_NAME = 'LuminaReaderUltra';
+  const DB_VERSION = 3;
+  const STORE_BOOKS = 'books';
+  const STORE_COLLECTIONS = 'collections';
+  const STORE_STATS = 'stats';
+
+  const $ = id => document.getElementById(id);
+  const fileInput = $('fileInput');
+  const sidebar = $('sidebar');
+  const sidebarToggle = $('sidebarToggle');
+  const libraryList = $('libraryList');
+  const thumbGrid = $('thumbGrid');
+  const bookmarkList = $('bookmarkList');
+  const viewerBody = $('viewerBody');
+  const emptyState = $('emptyState');
+  const loadingOverlay = $('loadingOverlay');
+  const loadingText = $('loadingText');
+  const curPage = $('curPage');
+  const totPage = $('totPage');
+  const pageSlider = $('pageSlider');
+  const prevBtn = $('prevBtn');
+  const nextBtn = $('nextBtn');
+  const zoomInBtn = $('zoomInBtn');
+  const zoomOutBtn = $('zoomOutBtn');
+  const fitBtn = $('fitBtn');
+  const fsBtn = $('fsBtn');
+  const zoomDisplay = $('zoomDisplay');
+  const modeSingle = $('modeSingle');
+  const modeDouble = $('modeDouble');
+  const modeScroll = $('modeScroll');
+  const modeFocus = $('modeFocus');
+  const autoScrollBtn = $('autoScrollBtn');
+  const heatmapBtn = $('heatmapBtn');
+  const bookmarkBtn = $('bookmarkBtn');
+  const searchInput = $('searchInput');
+  const themeBtn = $('themeBtn');
+  const helpBtn = $('helpBtn');
+  const aiBtn = $('aiBtn');
+  const soundBtn = $('soundBtn');
+  const toastStack = $('toastStack');
+  const minimap = $('minimap');
+  const minimapViewport = $('minimapViewport');
+  const cmdPalette = $('cmdPalette');
+  const cmdInput = $('cmdInput');
+  const cmdResults = $('cmdResults');
+  const aiProcessing = $('aiProcessing');
+  const aiProcessingText = $('aiProcessingText');
+
+  // ================ UTILS ================
+  const uid = () => 'b_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const fmtSize = b => {
+    if (b < 1024) return b + ' B';
+    if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+    if (b < 1073741824) return (b / 1048576).toFixed(1) + ' MB';
+    return (b / 1073741824).toFixed(2) + ' GB';
+  };
+  const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fmtTime = s => {
+    if (s < 60) return s + 's';
+    if (s < 3600) return Math.floor(s / 60) + 'm ' + (s % 60) + 's';
+    return Math.floor(s / 3600) + 'h ' + Math.floor((s % 3600) / 60) + 'm';
+  };
+
+  function toast(msg, type = 'success', duration = 3000) {
+    const icons = { success: 'fa-check-circle', warn: 'fa-exclamation-triangle', error: 'fa-circle-xmark', info: 'fa-circle-info', ai: 'fa-robot' };
+    const el = document.createElement('div');
+    el.className = 'toast ' + type;
+    el.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span>${msg}</span>`;
+    toastStack.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('show'));
+    setTimeout(() => {
+      el.classList.remove('show');
+      setTimeout(() => el.remove(), 500);
+    }, duration);
+  }
+
+  // ================ GENERATIVE BACKGROUND ================
+  (function initGenerativeBG() {
+    const canvas = $('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let mouse = { x: innerWidth / 2, y: innerHeight / 2 };
+    function resize() {
+      canvas.width = innerWidth;
+      canvas.height = innerHeight;
+    }
+    resize();
+    addEventListener('resize', resize);
+    addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+
+    const palette = [
+      [91, 164, 255],   // primary
+      [192, 132, 252],  // accent
+      [0, 229, 199],    // ai
+      [255, 108, 224],  // accent-2
+    ];
+
+    for (let i = 0; i < 80; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        r: Math.random() * 2 + 0.4,
+        color: palette[Math.floor(Math.random() * palette.length)],
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
+
+    let t = 0;
+    function draw() {
+      t += 0.005;
+      ctx.fillStyle = 'rgba(3, 5, 10, 0.08)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // gradient blobs
+      ctx.globalCompositeOperation = 'screen';
+      for (const p of particles) {
+        const dx = mouse.x - p.x;
+        const dy = mouse.y - p.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 200 && dist > 0) {
+          p.vx += (dx / dist) * 0.005;
+          p.vy += (dy / dist) * 0.005;
+        }
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.995;
+        p.vy *= 0.995;
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+        const pulse = 0.5 + 0.5 * Math.sin(t + p.phase);
+        const rad = p.r * (1 + pulse * 0.5);
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, rad * 30);
+        const c = p.color;
+        grad.addColorStop(0, `rgba(${c[0]},${c[1]},${c[2]},${0.4 * pulse})`);
+        grad.addColorStop(1, `rgba(${c[0]},${c[1]},${c[2]},0)`);
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, rad * 30, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalCompositeOperation = 'source-over';
+      requestAnimationFrame(draw);
+    }
+    draw();
+  })();
+
+  // ================ CUSTOM CURSOR ================
+  (function initCursor() {
+    const dot = $('cursorDot');
+    const ring = $('cursorRing');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+    addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      dot.style.left = mx + 'px';
+      dot.style.top = my + 'px';
+    });
+    function animRing() {
+      rx += (mx - rx) * 0.18;
+      ry += (my - ry) * 0.18;
+      ring.style.left = rx + 'px';
+      ring.style.top = ry + 'px';
+      requestAnimationFrame(animRing);
+    }
+    animRing();
+    document.addEventListener('mouseover', e => {
+      const t = e.target;
+      if (t.closest('button, a, .lib-card, .thumb-card, .tab, input, .sound-btn, .format-chip, .cmd-item')) {
+        ring.classList.add('hover');
+      } else ring.classList.remove('hover');
+    });
+    document.addEventListener('mousedown', () => ring.classList.add('click'));
+    document.addEventListener('mouseup', () => ring.classList.remove('click'));
+    // Enable on first mouse move
+    document.body.classList.add('custom-cursor');
+    // Disable on touch devices
+    if ('ontouchstart' in window) {
+      document.body.classList.remove('custom-cursor');
+      state.customCursor = false;
+    }
+  })();
+
+  // ================ RIPPLE ================
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.btn');
+    if (!btn) return;
+    const rect = btn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+    ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+    btn.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 700);
+  });
+
+  // ================ INDEXEDDB ================
+  let db = null;
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, DB_VERSION);
+      req.onupgradeneeded = e => {
+        const d = e.target.result;
+        if (!d.objectStoreNames.contains(STORE_BOOKS)) {
+          const store = d.createObjectStore(STORE_BOOKS, { keyPath: 'id' });
+          store.createIndex('addedAt', 'addedAt');
+        }
+        if (!d.objectStoreNames.contains(STORE_COLLECTIONS)) {
+          d.createObjectStore(STORE_COLLECTIONS, { keyPath: 'id' });
+        }
+        if (!d.objectStoreNames.contains(STORE_STATS)) {
+          d.createObjectStore(STORE_STATS, { keyPath: 'id' });
+        }
+      };
+      req.onsuccess = e => { db = e.target.result; resolve(db); };
+      req.onerror = e => reject(e.target.error);
+    });
+  }
+  const tx = (store, mode) => db.transaction(store, mode).objectStore(store);
+  const dbGetAll = store => new Promise((res, rej) => { const r = tx(store, 'readonly').getAll(); r.onsuccess = () => res(r.result || []); r.onerror = e => rej(e.target.error); });
+  const dbPut = (store, val) => new Promise((res, rej) => { const t = db.transaction(store, 'readwrite'); t.objectStore(store).put(val); t.oncomplete = () => res(); t.onerror = e => rej(e.target.error); });
+  const dbDelete = (store, id) => new Promise((res, rej) => { const t = db.transaction(store, 'readwrite'); t.objectStore(store).delete(id); t.oncomplete = () => res(); t.onerror = e => rej(e.target.error); });
+
+  // ================ AUDIO ENGINE ================
+  function getAudioCtx() {
+    if (!state.audioContext) {
+      state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (state.audioContext.state === 'suspended') state.audioContext.resume();
+    return state.audioContext;
+  }
+
+  function createNoiseBuffer(type, seconds = 4) {
+    const ctx = getAudioCtx();
+    const sr = ctx.sampleRate;
+    const buffer = ctx.createBuffer(1, sr * seconds, sr);
+    const data = buffer.getChannelData(0);
+    if (type === 'white') {
+      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    } else if (type === 'pink') {
+      let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+      for (let i = 0; i < data.length; i++) {
+        const w = Math.random() * 2 - 1;
+        b0 = 0.99886 * b0 + w * 0.0555179;
+        b1 = 0.99332 * b1 + w * 0.0750759;
+        b2 = 0.96900 * b2 + w * 0.1538520;
+        b3 = 0.86650 * b3 + w * 0.3104856;
+        b4 = 0.55000 * b4 + w * 0.5329522;
+        b5 = -0.7616 * b5 - w * 0.0168980;
+        data[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.11;
+        b6 = w * 0.115926;
+      }
+    } else if (type === 'brown') {
+      let last = 0;
+      for (let i = 0; i < data.length; i++) {
+        const w = Math.random() * 2 - 1;
+        data[i] = (last + 0.02 * w) / 1.02;
+        last = data[i];
+        data[i] *= 3.5;
+      }
+    } else if (type === 'rain') {
+      let b0 = 0, b1 = 0, b2 = 0;
+      for (let i = 0; i < data.length; i++) {
+        const w = Math.random() * 2 - 1;
+        b0 = 0.99 * b0 + w * 0.05;
+        b1 = 0.96 * b1 + w * 0.1;
+        b2 = 0.85 * b2 + w * 0.2;
+        data[i] = (b0 + b1 + b2) * 0.5;
+        if (Math.random() < 0.0005) data[i] += Math.random() * 0.6 - 0.3;
+      }
+    } else if (type === 'cafe') {
+      let b0 = 0, b1 = 0;
+      for (let i = 0; i < data.length; i++) {
+        const w = Math.random() * 2 - 1;
+        b0 = 0.98 * b0 + w * 0.08;
+        b1 = 0.9 * b1 + w * 0.15;
+        data[i] = (b0 + b1 * 0.5) * 0.4;
+      }
+    } else if (type === 'ocean') {
+      let last = 0;
+      for (let i = 0; i < data.length; i++) {
+        const w = Math.random() * 2 - 1;
+        last = (last + 0.02 * w) / 1.02;
+        const wave = 0.5 + 0.5 * Math.sin(i / sr * 0.3);
+        data[i] = last * 3.5 * (0.3 + 0.7 * wave);
+      }
+    } else if (type === 'forest') {
+      let b0 = 0, b1 = 0, b2 = 0;
+      for (let i = 0; i < data.length; i++) {
+        const w = Math.random() * 2 - 1;
+        b0 = 0.99 * b0 + w * 0.05;
+        b1 = 0.95 * b1 + w * 0.1;
+        b2 = 0.8 * b2 + w * 0.2;
+        data[i] = (b0 + b1 * 0.5 + b2 * 0.3) * 0.5;
+      }
+    } else if (type === 'fire') {
+      let last = 0;
+      for (let i = 0; i < data.length; i++) {
+        const w = Math.random() * 2 - 1;
+        last = (last + 0.02 * w) / 1.02;
+        data[i] = last * 3;
+        if (Math.random() < 0.001) data[i] += Math.random() * 0.8;
+      }
+    }
+    return buffer;
+  }
+
+  function playSound(type) {
+    stopSound();
+    if (type === 'off') { state.soundType = 'off'; updateSoundViz(false); return; }
+    try {
+      const ctx = getAudioCtx();
+      const buffer = createNoiseBuffer(type);
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.loop = true;
+      const gain = ctx.createGain();
+      gain.gain.value = parseFloat($('volumeSlider').value) / 100 * 0.5;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = type === 'white' ? 20000 : 8000;
+      source.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      source.start();
+      state.soundSource = source;
+      state.soundGain = gain;
+      state.soundType = type;
+      document.querySelectorAll('.sound-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.sound === type);
+      });
+      updateSoundViz(true);
+      toast(`Đang phát: ${type}`, 'info', 1500);
+    } catch (e) {
+      console.error(e);
+      toast('Lỗi âm thanh', 'error');
+    }
+  }
+
+  function stopSound() {
+    if (state.soundSource) {
+      try { state.soundSource.stop(); } catch (e) {}
+      state.soundSource = null;
+    }
+  }
+
+  function updateSoundViz(active) {
+    const viz = $('soundViz');
+    if (!active) { viz.innerHTML = ''; return; }
+    let html = '';
+    for (let i = 0; i < 24; i++) {
+      html += `<div class="sound-viz-bar" style="animation-delay:${i * 0.05}s; animation-duration:${0.6 + Math.random() * 0.6}s;"></div>`;
+    }
+    viz.innerHTML = html;
+  }
+
+  // ================ AI ================
+  function aiRespond(query) {
+    const q = query.toLowerCase().trim();
+    const book = state.library[state.currentBook];
+    const lib = state.library;
+    if (!q) return 'Bạn muốn hỏi gì?';
+    if (/xin chào|hello|hi|chào/.test(q)) {
+      return `Xin chào! 👋 Thư viện có ${lib.length} truyện. Hỏi tôi về tóm tắt, gợi ý, thống kê, hoặc cách dùng!`;
+    }
+    if (/tóm tắt|summary|nội dung/.test(q)) {
+      if (!book) return 'Chưa có truyện nào mở.';
+      return `📖 **${book.name}**\n- ${book.ext.toUpperCase()} • ${book.totalPages} trang • ${fmtSize(book.size)}\n- Đang đọc: trang ${state.currentPage + 1}/${book.totalPages} (${Math.round((state.currentPage + 1) / book.totalPages * 100)}%)`;
+    }
+    if (/gợi ý|đề xuất|recommend/.test(q)) {
+      if (lib.length < 2) return 'Cần thêm truyện để gợi ý!';
+      const others = lib.filter((b, i) => i !== state.currentBook);
+      const pick = others[Math.floor(Math.random() * others.length)];
+      return `💡 Gợi ý: **${pick.name}** (${pick.totalPages} trang)`;
+    }
+    if (/thống kê|stats/.test(q)) {
+      const totalPages = lib.reduce((s, b) => s + b.totalPages, 0);
+      const totalSize = lib.reduce((s, b) => s + b.size, 0);
+      return `📊 **Thống kê**\n- Truyện: ${lib.length}\n- Trang: ${totalPages}\n- Dung lượng: ${fmtSize(totalSize)}\n- Nhóm: ${state.collections.length}\n- Thời gian đọc: ${fmtTime(state.stats.totalReadingTime)}`;
+    }
+    if (/đọc to|tts|text to speech/.test(q)) {
+      speakCurrentPage();
+      return '🔊 Đang đọc trang hiện tại...';
+    }
+    if (/âm thanh|nhạc|sound|noise/.test(q)) {
+      return '🎵 9 loại âm thanh: White, Pink, Brown, Mưa, Cafe, Biển, Rừng, Lửa, Tắt. Nhấn S!';
+    }
+    if (/phím tắt|shortcut|hotkey/.test(q)) return '⌨️ Nhấn **?** để xem đầy đủ!';
+    if (/thời gian|time/.test(q)) {
+      return `⏱️ Bạn đã đọc tổng cộng **${fmtTime(state.stats.totalReadingTime)}**, ${state.stats.pagesRead} trang.`;
+    }
+    if (/phân tích|analyze|vision|ảnh/.test(q)) {
+      analyzeCurrentPage();
+      return '🔍 Đang phân tích ảnh bằng Computer Vision...';
+    }
+    if (/heatmap|bản đồ nhiệt/.test(q)) {
+      toggleHeatmap();
+      return '🔥 Đã bật/tắt heatmap nhiệt đọc.';
+    }
+    if (/auto scroll|tự động cuộn/.test(q)) {
+      toggleAutoScroll();
+      return `📜 Auto scroll: ${state.autoScroll ? 'BẬT' : 'TẮT'}`;
+    }
+    if (/command|palette|lệnh/.test(q)) {
+      openCmdPalette();
+      return '⚡ Đã mở Command Palette.';
+    }
+    if (/tối ưu|optimi|mẹo/.test(q)) {
+      return '⚡ Mẹo:\n- **Ctrl+K** command palette\n- **4** AI Focus mode\n- **V** phân tích ảnh\n- **H** heatmap\n- **5** auto scroll\n- Âm thanh trắng để tập trung';
+    }
+    return `Tôi hiểu bạn hỏi về "${query}". Thử: "tóm tắt", "gợi ý", "thống kê", "đọc to", "âm thanh", "phân tích", "phím tắt", "command".`;
+  }
+
+  function addAIMessage(text, sender = 'bot') {
+    const chat = $('aiChat');
+    const el = document.createElement('div');
+    el.className = 'ai-msg ' + sender;
+    el.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+    chat.appendChild(el);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function speakCurrentPage() {
+    if (!('speechSynthesis' in window)) { toast('Không hỗ trợ TTS', 'warn'); return; }
+    const book = state.library[state.currentBook];
+    if (!book) { toast('Chưa mở truyện', 'warn'); return; }
+    const text = `Đang đọc trang ${state.currentPage + 1} của ${book.name}`;
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'vi-VN'; utter.rate = 1;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utter);
+    toast('Đang đọc to...', 'ai', 2000);
+  }
+
+  function initVoiceRecognition() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return null;
+    const rec = new SR();
+    rec.lang = 'vi-VN'; rec.continuous = false; rec.interimResults = false;
+    rec.onresult = e => {
+      const text = e.results[0][0].transcript;
+      $('aiInput').value = text;
+      sendAIMessage();
+    };
+    rec.onerror = () => toast('Không nhận diện được', 'warn');
+    return rec;
+  }
+
+  function sendAIMessage() {
+    const input = $('aiInput');
+    const q = input.value.trim();
+    if (!q) return;
+    addAIMessage(q, 'user');
+    input.value = '';
+    setTimeout(() => addAIMessage(aiRespond(q), 'bot'), 400);
+  }
+
+  // ================ AI VISION (simulated) ================
+  function analyzeCurrentPage() {
+    const book = state.library[state.currentBook];
+    if (!book) { toast('Chưa mở truyện', 'warn'); return; }
+    const page = book.pages[state.currentPage];
+    if (!page || page.type !== 'image') { toast('Chỉ phân tích được ảnh', 'warn'); return; }
+    aiProcessing.classList.add('active');
+    aiProcessingText.textContent = 'Đang phân tích ảnh...';
+    setTimeout(() => {
+      const w = page.data?.size || 0;
+      const analysis = [
+        `Kích thước: ${(page.data?.size / 1024).toFixed(1)} KB`,
+        `Định dạng: ${page.name.split('.').pop().toUpperCase()}`,
+        `Màu sắc chủ đạo: Đa dạng`,
+        `Độ tương phản: Cao`,
+        `Đề xuất: ${Math.random() > 0.5 ? 'Đọc ở chế độ Đơn' : 'Đọc ở chế độ Focus'}`,
+      ].join('\n');
+      aiProcessing.classList.remove('active');
+      addAIMessage('🔍 **Kết quả phân tích ảnh:**\n' + analysis, 'bot');
+      openModal('aiModal');
+    }, 1200);
+  }
+
+  // ================ LIBRARY ================
+  function renderLibrary() {
+    if (!state.library.length) {
+      libraryList.innerHTML = `<div class="empty-hint"><i class="fas fa-inbox"></i>Chưa có truyện.<br>Nhấn <strong>Mở</strong> để thêm.</div>`;
+      return;
+    }
+    const filter = state.searchQuery.toLowerCase();
+    let html = '';
+    const groupedIds = new Set(state.collections.flatMap(c => c.bookIds));
+    const ungrouped = state.library.filter(b => !groupedIds.has(b.id));
+
+    state.collections.forEach(col => {
+      const books = state.library.filter(b => col.bookIds.includes(b.id));
+      if (filter && !col.name.toLowerCase().includes(filter) && !books.some(b => b.name.toLowerCase().includes(filter))) return;
+      html += `
+        <div class="collection-group ${col._open !== false ? 'open' : ''}" data-col="${col.id}">
+          <div class="collection-header" data-toggle="${col.id}">
+            <div class="collection-title">
+              <i class="fas fa-folder"></i>
+              <span>${escapeHtml(col.name)}</span>
+              <span class="collection-count">${books.length}</span>
+            </div>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+          <div class="collection-body" data-drop="${col.id}">
+            ${books.map(b => renderBookCard(b)).join('') || '<div style="text-align:center;padding:0.8rem;color:var(--text-3);font-size:0.72rem;">Kéo truyện vào đây</div>'}
+          </div>
+        </div>`;
+    });
+    if (ungrouped.length) {
+      if (state.collections.length) {
+        html += `<div style="font-size:0.65rem;color:var(--text-3);text-transform:uppercase;letter-spacing:0.1em;padding:0.5rem 0.25rem;margin-top:0.5rem;">Chưa phân nhóm</div>`;
+      }
+      html += ungrouped.map(b => renderBookCard(b)).join('');
+    }
+    libraryList.innerHTML = html;
+
+    libraryList.querySelectorAll('.lib-card').forEach(el => {
+      el.addEventListener('click', e => {
+        if (e.target.closest('.lib-delete') || e.target.closest('.lib-more')) return;
+        openBook(parseInt(el.dataset.idx, 10));
+      });
+      el.draggable = true;
+      el.addEventListener('dragstart', e => {
+        el.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', el.dataset.id);
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      el.addEventListener('dragend', () => el.classList.remove('dragging'));
+    });
+    libraryList.querySelectorAll('.lib-delete').forEach(btn => {
+      btn.addEventListener('click', async e => {
+        e.stopPropagation();
+        const id = btn.dataset.del;
+        if (!confirm('Xóa truyện này?')) return;
+        await dbDelete(STORE_BOOKS, id);
+        for (const col of state.collections) {
+          const i = col.bookIds.indexOf(id);
+          if (i >= 0) { col.bookIds.splice(i, 1); await dbPut(STORE_COLLECTIONS, col); }
+        }
+        const i = state.library.findIndex(b => b.id === id);
+        if (i >= 0) {
+          if (state.currentBook === i) closeBook();
+          state.library.splice(i, 1);
+          renderLibrary();
+          toast('Đã xóa', 'success');
+        }
+      });
+    });
+    libraryList.querySelectorAll('.lib-more').forEach(btn => {
+      btn.addEventListener('click', async e => {
+        e.stopPropagation();
+        const id = btn.dataset.more;
+        const col = state.collections[0];
+        if (!col) { toast('Chưa có nhóm. Tạo nhóm trước!', 'warn'); return; }
+        if (!col.bookIds.includes(id)) {
+          col.bookIds.push(id);
+          await dbPut(STORE_COLLECTIONS, col);
+          renderLibrary();
+          toast(`Đã thêm vào "${col.name}"`, 'success');
+        } else toast('Đã có trong nhóm', 'info');
+      });
+    });
+    libraryList.querySelectorAll('[data-toggle]').forEach(h => {
+      h.addEventListener('click', () => {
+        const col = state.collections.find(c => c.id === h.dataset.toggle);
+        if (col) { col._open = col._open === false ? true : false; h.parentElement.classList.toggle('open'); }
+      });
+    });
+    libraryList.querySelectorAll('[data-drop]').forEach(zone => {
+      zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.background = 'var(--primary-soft)'; });
+      zone.addEventListener('dragleave', () => zone.style.background = '');
+      zone.addEventListener('drop', async e => {
+        e.preventDefault();
+        zone.style.background = '';
+        const bookId = e.dataTransfer.getData('text/plain');
+        const col = state.collections.find(c => c.id === zone.dataset.drop);
+        if (col && !col.bookIds.includes(bookId)) {
+          col.bookIds.push(bookId);
+          await dbPut(STORE_COLLECTIONS, col);
+          renderLibrary();
+          toast('Đã thêm vào nhóm', 'success');
+        }
+      });
+    });
+  }
+
+  function renderBookCard(b) {
+    const idx = state.library.indexOf(b);
+    const active = idx === state.currentBook ? 'active' : '';
+    const progress = b.totalPages ? (b.lastReadPage / b.totalPages) * 100 : 0;
+    const coverUrl = b._coverUrl || '';
+    return `
+      <div class="lib-card ${active}" data-idx="${idx}" data-id="${b.id}">
+        <div class="lib-thumb">
+          ${coverUrl ? `<img src="${coverUrl}" alt="">` : `<i class="fas fa-book"></i>`}
+          ${b.ext === 'pdf' ? '<div class="pdf-badge">PDF</div>' : ''}
+        </div>
+        <div class="lib-info">
+          <div class="lib-title">${escapeHtml(b.name)}</div>
+          <div class="lib-meta">
+            <span><i class="fas fa-layer-group"></i> ${b.totalPages}</span>
+            <span><i class="fas fa-hdd"></i> ${fmtSize(b.size)}</span>
+          </div>
+          <div class="lib-meta" style="margin-top:2px;">
+            <span><i class="fas fa-clock"></i> Trang ${b.lastReadPage + 1}</span>
+          </div>
+        </div>
+        <button class="lib-more" data-more="${b.id}"><i class="fas fa-folder-plus"></i></button>
+        <button class="lib-delete" data-del="${b.id}"><i class="fas fa-trash"></i></button>
+        <div class="lib-progress" style="width:${progress}%"></div>
+      </div>`;
+  }
+
+  function renderBookmarks() {
+    const book = state.library[state.currentBook];
+    if (!book || !book.bookmarks.length) {
+      bookmarkList.innerHTML = `<div class="empty-hint"><i class="fas fa-bookmark"></i>Chưa đánh dấu.<br>Nhấn <kbd class="kbd">B</kbd></div>`;
+      return;
+    }
+    const sorted = [...book.bookmarks].sort((a, b) => a - b);
+    let html = '';
+    sorted.forEach(idx => {
+      const page = book.pages[idx];
+      if (!page) return;
+      const thumbUrl = page._thumbUrl || '';
+      html += `
+        <div class="lib-card" data-idx="${idx}">
+          <div class="lib-thumb">${thumbUrl ? `<img src="${thumbUrl}">` : `<i class="fas fa-file"></i>`}</div>
+          <div class="lib-info">
+            <div class="lib-title">Trang ${idx + 1}</div>
+            <div class="lib-meta"><i class="fas fa-bookmark" style="color:var(--gold)"></i> Đã đánh dấu</div>
+          </div>
+        </div>`;
+    });
+    bookmarkList.innerHTML = html;
+    bookmarkList.querySelectorAll('.lib-card').forEach(el => {
+      el.addEventListener('click', () => goToPage(parseInt(el.dataset.idx, 10)));
+    });
+  }
+
+  function renderThumbs() {
+    const book = state.library[state.currentBook];
+    if (!book) {
+      thumbGrid.innerHTML = `<div class="empty-hint"><i class="fas fa-images"></i>Chưa có trang</div>`;
+      return;
+    }
+    const filter = state.searchQuery.trim().toLowerCase();
+    let html = '';
+    book.pages.forEach((p, i) => {
+      if (filter && !String(i + 1).includes(filter) && !p.name.toLowerCase().includes(filter)) return;
+      const active = i === state.currentPage ? 'active' : '';
+      const bm = book.bookmarks.includes(i) ? `<div class="thumb-bookmark"><i class="fas fa-bookmark"></i></div>` : '';
+      const thumbUrl = p._thumbUrl || '';
+      html += `
+        <div class="thumb-card ${active}" data-idx="${i}">
+          ${thumbUrl ? `<img src="${thumbUrl}" loading="lazy">` : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:1.4rem;"><i class="fas fa-file-pdf"></i></div>`}
+          ${bm}
+          <div class="thumb-num">${i + 1}</div>
+        </div>`;
+    });
+    thumbGrid.innerHTML = html || `<div class="empty-hint"><i class="fas fa-search"></i>Không thấy</div>`;
+    thumbGrid.querySelectorAll('.thumb-card').forEach(el => {
+      el.addEventListener('click', () => goToPage(parseInt(el.dataset.idx, 10)));
+    });
+  }
+
+  // ================ VIEWER ================
+  async function openBook(idx) {
+    const book = state.library[idx];
+    if (!book) return;
+    state.currentBook = idx;
+    state.currentPage = Math.min(book.lastReadPage || 0, book.totalPages - 1);
+    state.zoom = 100;
+    state.fitMode = 'auto';
+    state.stats.sessionsCount++;
+    state.stats.lastSession = Date.now();
+    saveStats();
+
+    if (book.ext === 'pdf' && book.pages[0] && book.pages[0].pdfUrl) {
+      try { state.pdfDoc = await pdfjsLib.getDocument(book.pages[0].pdfUrl).promise; } catch (e) { console.error(e); }
+    } else state.pdfDoc = null;
+
+    renderLibrary();
+    renderThumbs();
+    renderBookmarks();
+    updateBookmarkBtn();
+    updateMinimap();
+    await renderPage();
+  }
+
+  function closeBook() {
+    state.currentBook = null;
+    state.currentPage = 0;
+    state.pdfDoc = null;
+    emptyState.style.display = 'flex';
+    Array.from(viewerBody.children).forEach(c => {
+      if (c !== emptyState && c !== loadingOverlay) c.remove();
+    });
+    minimap.style.display = 'none';
+    updateUI();
+    renderThumbs();
+    renderBookmarks();
+  }
+
+  async function renderPage() {
+    const book = state.library[state.currentBook];
+    if (!book) { closeBook(); return; }
+    emptyState.style.display = 'none';
+    Array.from(viewerBody.children).forEach(c => {
+      if (c !== emptyState && c !== loadingOverlay) c.remove();
+    });
+    const mode = state.readingMode;
+    viewerBody.className = 'viewer-body mode-' + mode.replace('focus', 'single');
+    if (mode === 'focus') viewerBody.classList.add('ai-active');
+
+    if (mode === 'scroll') await renderScrollMode(book);
+    else if (mode === 'double') await renderDoubleMode(book);
+    else await renderSinglePage(book, state.currentPage);
+
+    updateUI();
+    updateBookmarkBtn();
+    updateMinimap();
+  }
+
+  async function renderSinglePage(book, pageIdx) {
+    const page = book.pages[pageIdx];
+    if (!page) return;
+    if (page.type === 'image') {
+      const img = document.createElement('img');
+      img.className = 'page-img';
+      if (state.readingMode === 'focus') img.classList.add('ai-focus');
+      img.src = page.dataUrl;
+      img.alt = `Trang ${pageIdx + 1}`;
+      img.addEventListener('click', () => openFullscreen(img));
+      img.addEventListener('load', applyFit);
+      viewerBody.appendChild(img);
+      preloadNeighbors(book, pageIdx);
+    } else if (page.type === 'pdf' && state.pdfDoc) {
+      try {
+        const pdfPage = await state.pdfDoc.getPage(page.pageNumber);
+        const canvas = await renderPDFPage(pdfPage, state.zoom);
+        canvas.className = 'page-img';
+        canvas.addEventListener('click', () => openFullscreen(canvas));
+        viewerBody.appendChild(canvas);
+        applyFit();
+      } catch (e) { console.error(e); }
+    }
+  }
+
+  async function renderDoubleMode(book) {
+    const indices = [state.currentPage];
+    if (state.currentPage + 1 < book.totalPages) indices.push(state.currentPage + 1);
+    const wrapper = document.createElement('div');
+    wrapper.className = 'double-wrapper';
+    viewerBody.appendChild(wrapper);
+    for (const idx of indices) {
+      const page = book.pages[idx];
+      if (!page) continue;
+      if (page.type === 'image') {
+        const img = document.createElement('img');
+        img.className = 'page-img';
+        img.src = page.dataUrl;
+        img.addEventListener('click', () => openFullscreen(img));
+        wrapper.appendChild(img);
+      } else if (page.type === 'pdf' && state.pdfDoc) {
+        try {
+          const pdfPage = await state.pdfDoc.getPage(page.pageNumber);
+          const canvas = await renderPDFPage(pdfPage, state.zoom);
+          canvas.className = 'page-img';
+          canvas.addEventListener('click', () => openFullscreen(canvas));
+          wrapper.appendChild(canvas);
+        } catch (e) { console.error(e); }
+      }
+    }
+    applyFit();
+  }
+
+  async function renderScrollMode(book) {
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < book.totalPages; i++) {
+      const page = book.pages[i];
+      if (page.type === 'image') {
+        const img = document.createElement('img');
+        img.className = 'page-img';
+        img.src = page.dataUrl;
+        img.loading = 'lazy';
+        img.dataset.idx = i;
+        img.addEventListener('click', () => openFullscreen(img));
+        fragment.appendChild(img);
+      } else if (page.type === 'pdf') {
+        const ph = document.createElement('div');
+        ph.className = 'page-img';
+        ph.style.minHeight = '600px';
+        ph.style.background = 'var(--bg-2)';
+        ph.style.display = 'flex';
+        ph.style.alignItems = 'center';
+        ph.style.justifyContent = 'center';
+        ph.style.color = 'var(--text-3)';
+        ph.innerHTML = `<div style="text-align:center;"><div class="loader" style="margin:0 auto 1rem;"></div>Trang ${i + 1}...</div>`;
+        ph.dataset.idx = i;
+        fragment.appendChild(ph);
+      }
+    }
+    viewerBody.appendChild(fragment);
+
+    if (book.pages.some(p => p.type === 'pdf') && state.pdfDoc) {
+      const observer = new IntersectionObserver(async (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const el = entry.target;
+            if (el.tagName === 'DIV' && el.dataset.idx !== undefined && !el.dataset.rendered) {
+              el.dataset.rendered = '1';
+              const i = parseInt(el.dataset.idx, 10);
+              const page = book.pages[i];
+              if (page.type === 'pdf') {
+                try {
+                  const pdfPage = await state.pdfDoc.getPage(page.pageNumber);
+                  const canvas = await renderPDFPage(pdfPage, 100);
+                  canvas.className = 'page-img';
+                  canvas.dataset.idx = i;
+                  canvas.addEventListener('click', () => openFullscreen(canvas));
+                  el.replaceWith(canvas);
+                } catch (e) { console.error(e); }
+              }
+            }
+          }
+        }
+      }, { rootMargin: '300px' });
+      viewerBody.querySelectorAll('div.page-img[data-idx]').forEach(el => observer.observe(el));
+    }
+    setTimeout(() => {
+      const target = viewerBody.querySelector(`[data-idx="${state.currentPage}"]`);
+      if (target) target.scrollIntoView({ block: 'start' });
+    }, 100);
+  }
+
+  async function renderPDFPage(pdfPage, zoom) {
+    const baseViewport = pdfPage.getViewport({ scale: 1 });
+    const viewerW = viewerBody.clientWidth - 60;
+    const viewerH = viewerBody.clientHeight - 60;
+    const scaleW = viewerW / baseViewport.width;
+    const scaleH = viewerH / baseViewport.height;
+    let scale = Math.min(scaleW, scaleH, 3);
+    if (state.fitMode === 'manual') scale = (zoom / 100) * Math.min(scaleW, scaleH, 3);
+    const viewport = pdfPage.getViewport({ scale });
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    await pdfPage.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+    return canvas;
+  }
+
+  function preloadNeighbors(book, idx) {
+    [idx + 1, idx + 2, idx - 1].forEach(i => {
+      if (i < 0 || i >= book.totalPages) return;
+      const p = book.pages[i];
+      if (p.type === 'image' && !p._preloaded) {
+        const im = new Image();
+        im.src = p.dataUrl;
+        p._preloaded = true;
+      }
+    });
+  }
+
+  function applyFit() {
+    const el = viewerBody.querySelector('.page-img');
+    if (!el) return;
+    if (state.fitMode === 'auto') {
+      el.style.transform = 'scale(1)';
+      state.zoom = 100;
+    } else el.style.transform = `scale(${state.zoom / 100})`;
+    updateUI();
+  }
+
+  function updateUI() {
+    const book = state.library[state.currentBook];
+    const total = book ? book.totalPages : 0;
+    const cur = book ? state.currentPage + 1 : 0;
+    curPage.textContent = cur;
+    totPage.textContent = total;
+    zoomDisplay.textContent = state.zoom + '%';
+    pageSlider.max = Math.max(0, total - 1);
+    pageSlider.value = state.currentPage;
+    prevBtn.disabled = !book || state.currentPage <= 0;
+    nextBtn.disabled = !book || state.currentPage >= total - 1;
+    fitBtn.classList.toggle('active', state.fitMode === 'auto');
+    modeSingle.classList.toggle('active', state.readingMode === 'single');
+    modeDouble.classList.toggle('active', state.readingMode === 'double');
+    modeScroll.classList.toggle('active', state.readingMode === 'scroll');
+    modeFocus.classList.toggle('active', state.readingMode === 'focus');
+    autoScrollBtn.classList.toggle('active', state.autoScroll);
+    heatmapBtn.classList.toggle('active', state.heatmapOn);
+  }
+
+  function updateBookmarkBtn() {
+    const book = state.library[state.currentBook];
+    if (!book) { bookmarkBtn.innerHTML = '<i class="far fa-bookmark"></i>'; return; }
+    const marked = book.bookmarks.includes(state.currentPage);
+    bookmarkBtn.innerHTML = marked ? '<i class="fas fa-bookmark" style="color:var(--gold)"></i>' : '<i class="far fa-bookmark"></i>';
+  }
+
+  function updateMinimap() {
+    const book = state.library[state.currentBook];
+    if (!book || state.readingMode !== 'single') { minimap.style.display = 'none'; return; }
+    minimap.style.display = 'block';
+    // Update viewport
+    const total = book.totalPages;
+    const cur = state.currentPage;
+    const vpHeight = 100 / total * 100;
+    const vpTop = (cur / total) * 100;
+    minimapViewport.style.height = Math.max(vpHeight, 5) + '%';
+    minimapViewport.style.top = vpTop + '%';
+    // Marks for bookmarks
+    minimap.querySelectorAll('.minimap-mark').forEach(m => m.remove());
+    book.bookmarks.forEach(bm => {
+      const mark = document.createElement('div');
+      mark.className = 'minimap-mark';
+      mark.style.top = (bm / total * 100) + '%';
+      minimap.appendChild(mark);
+    });
+  }
+
+  async function goToPage(idx) {
+    const book = state.library[state.currentBook];
+    if (!book) return;
+    if (idx < 0) idx = 0;
+    if (idx >= book.totalPages) idx = book.totalPages - 1;
+    state.currentPage = idx;
+    book.lastReadPage = idx;
+    state.fitMode = 'auto';
+    state.zoom = 100;
+
+    // Track heatmap dwell
+    state.pageHeatmap[idx] = (state.pageHeatmap[idx] || 0) + 1;
+    state.stats.pagesRead++;
+
+    if (state.readingMode === 'scroll') {
+      const target = viewerBody.querySelector(`[data-idx="${idx}"]`);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else await renderPage();
+    renderThumbs();
+    updateUI();
+    updateBookmarkBtn();
+    updateMinimap();
+    saveProgressDebounced(book);
+  }
+
+  function toggleBookmark() {
+    const book = state.library[state.currentBook];
+    if (!book) return;
+    const i = book.bookmarks.indexOf(state.currentPage);
+    if (i >= 0) { book.bookmarks.splice(i, 1); toast('Đã bỏ đánh dấu', 'info', 1500); }
+    else { book.bookmarks.push(state.currentPage); toast('Đã đánh dấu', 'success', 1500); }
+    renderBookmarks();
+    renderThumbs();
+    updateBookmarkBtn();
+    updateMinimap();
+    dbPut(STORE_BOOKS, book);
+  }
+
+  let progressTimer;
+  function saveProgressDebounced(book) {
+    clearTimeout(progressTimer);
+    progressTimer = setTimeout(() => dbPut(STORE_BOOKS, book), 800);
+  }
+
+  function saveStats() {
+    dbPut(STORE_STATS, { id: 'user', ...state.stats });
+  }
+
+  function setZoom(z) {
+    state.fitMode = 'manual';
+    state.zoom = Math.max(20, Math.min(500, Math.round(z)));
+    applyFit();
+    updateUI();
+  }
+
+  // ================ MINIMAP CLICK ================
+  minimap.addEventListener('click', e => {
+    const book = state.library[state.currentBook];
+    if (!book) return;
+    const rect = minimap.getBoundingClientRect();
+    const ratio = (e.clientY - rect.top) / rect.height;
+    goToPage(Math.floor(ratio * book.totalPages));
+  });
+
+  // ================ HEATMAP ================
+  function toggleHeatmap() {
+    state.heatmapOn = !state.heatmapOn;
+    heatmapBtn.classList.toggle('active', state.heatmapOn);
+    renderHeatmap();
+    toast(`Heatmap: ${state.heatmapOn ? 'BẬT' : 'TẮT'}`, 'info', 1500);
+  }
+
+  function renderHeatmap() {
+    const old = viewerBody.querySelector('.heatmap-overlay');
+    if (old) old.remove();
+    if (!state.heatmapOn) return;
+    const book = state.library[state.currentBook];
+    if (!book) return;
+    const overlay = document.createElement('div');
+    overlay.className = 'heatmap-overlay';
+    const canvas = document.createElement('canvas');
+    overlay.appendChild(canvas);
+    viewerBody.appendChild(overlay);
+    requestAnimationFrame(() => {
+      canvas.width = viewerBody.clientWidth;
+      canvas.height = viewerBody.clientHeight;
+      const ctx = canvas.getContext('2d');
+      const keys = Object.keys(state.pageHeatmap).map(Number);
+      const maxDwell = Math.max(1, ...keys.map(k => state.pageHeatmap[k]));
+      // Render heatmap of pages visited as vertical gradient bars
+      const total = book.totalPages;
+      const barW = canvas.width / Math.min(total, 60);
+      for (let i = 0; i < Math.min(total, 60); i++) {
+        const idx = Math.floor(i / 60 * total);
+        const dwell = state.pageHeatmap[idx] || 0;
+        const intensity = dwell / maxDwell;
+        const x = i * barW;
+        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        grad.addColorStop(0, `rgba(255, 100, 100, ${intensity * 0.6})`);
+        grad.addColorStop(0.5, `rgba(255, 200, 100, ${intensity * 0.4})`);
+        grad.addColorStop(1, `rgba(255, 100, 100, ${intensity * 0.6})`);
+        ctx.fillStyle = grad;
+        ctx.fillRect(x, 0, barW * 0.7, canvas.height);
+      }
+    });
+  }
+
+  // ================ AUTO SCROLL ================
+  let autoScrollRAF = null;
+  function toggleAutoScroll() {
+    state.autoScroll = !state.autoScroll;
+    autoScrollBtn.classList.toggle('active', state.autoScroll);
+    autoScrollBtn.innerHTML = state.autoScroll ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
+    if (state.autoScroll) {
+      if (state.readingMode !== 'scroll') setReadingMode('scroll').then(startAutoScroll);
+      else startAutoScroll();
+      toast('Auto scroll BẬT', 'info', 1500);
+    } else {
+      stopAutoScroll();
+      toast('Auto scroll TẮT', 'info', 1500);
+    }
+  }
+
+  function startAutoScroll() {
+    let last = performance.now();
+    function step(now) {
+      if (!state.autoScroll) return;
+      const dt = (now - last) / 1000;
+      last = now;
+      viewerBody.scrollTop += 60 * state.autoScrollSpeed * dt;
+      if (viewerBody.scrollTop + viewerBody.clientHeight >= viewerBody.scrollHeight - 5) {
+        // Reached end - go to next page or stop
+        if (state.currentPage < state.library[state.currentBook].totalPages - 1) {
+          goToPage(state.currentPage + 1);
+        } else {
+          state.autoScroll = false;
+          autoScrollBtn.classList.remove('active');
+          autoScrollBtn.innerHTML = '<i class="fas fa-play"></i>';
+        }
+        return;
+      }
+      // Update current page based on visible
+      const imgs = viewerBody.querySelectorAll('.page-img[data-idx]');
+      const center = viewerBody.scrollTop + viewerBody.clientHeight / 2;
+      for (const img of imgs) {
+        const top = img.offsetTop;
+        const bottom = top + img.offsetHeight;
+        if (center >= top && center < bottom) {
+          const idx = parseInt(img.dataset.idx, 10);
+          if (idx !== state.currentPage) {
+            state.currentPage = idx;
+            state.library[state.currentBook].lastReadPage = idx;
+            updateUI();
+            saveProgressDebounced(state.library[state.currentBook]);
+          }
+          break;
+        }
+      }
+      autoScrollRAF = requestAnimationFrame(step);
+    }
+    autoScrollRAF = requestAnimationFrame(step);
+  }
+
+  function stopAutoScroll() {
+    if (autoScrollRAF) cancelAnimationFrame(autoScrollRAF);
+    autoScrollRAF = null;
+  }
+
+  // ================ FULLSCREEN ================
+  let fsOverlayEl = null;
+  function openFullscreen(sourceEl) {
+    if (!fsOverlayEl) {
+      fsOverlayEl = document.createElement('div');
+      fsOverlayEl.className = 'modal-overlay active';
+      fsOverlayEl.style.zIndex = '1500';
+      fsOverlayEl.innerHTML = `<div style="position:absolute;top:20px;right:24px;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;" id="fsCloseInner"><i class="fas fa-times"></i></div><div id="fsInner"></div>`;
+      document.body.appendChild(fsOverlayEl);
+      fsOverlayEl.addEventListener('click', e => { if (e.target === fsOverlayEl) closeFullscreen(); });
+      fsOverlayEl.querySelector('#fsCloseInner').addEventListener('click', closeFullscreen);
+    }
+    const inner = fsOverlayEl.querySelector('#fsInner');
+    inner.innerHTML = '';
+    if (sourceEl.tagName === 'IMG') {
+      const img = document.createElement('img');
+      img.src = sourceEl.src;
+      img.style.maxWidth = '100%'; img.style.maxHeight = '100%'; img.style.objectFit = 'contain';
+      inner.appendChild(img);
+    } else if (sourceEl.tagName === 'CANVAS') {
+      const c = document.createElement('canvas');
+      c.width = sourceEl.width; c.height = sourceEl.height;
+      c.getContext('2d').drawImage(sourceEl, 0, 0);
+      c.style.maxWidth = '100%'; c.style.maxHeight = '100%'; c.style.objectFit = 'contain';
+      inner.appendChild(c);
+    }
+    fsOverlayEl.classList.add('active');
+  }
+  function closeFullscreen() {
+    if (fsOverlayEl) {
+      fsOverlayEl.classList.remove('active');
+      fsOverlayEl.querySelector('#fsInner').innerHTML = '';
+    }
+  }
+
+  // ================ COMMAND PALETTE ================
+  const CMDS = [
+    { icon: 'fa-book-open', label: 'Mở truyện', shortcut: '', action: () => fileInput.click() },
+    { icon: 'fa-brain', label: 'AI Focus mode', shortcut: '4', action: () => setReadingMode('focus') },
+    { icon: 'fa-square', label: 'Chế độ đơn', shortcut: '1', action: () => setReadingMode('single') },
+    { icon: 'fa-clone', label: 'Chế độ đôi', shortcut: '2', action: () => setReadingMode('double') },
+    { icon: 'fa-bars', label: 'Cuộn dọc', shortcut: '3', action: () => setReadingMode('scroll') },
+    { icon: 'fa-play', label: 'Auto scroll', shortcut: '5', action: toggleAutoScroll },
+    { icon: 'fa-fire', label: 'Heatmap đọc', shortcut: 'H', action: toggleHeatmap },
+    { icon: 'fa-robot', label: 'AI Assistant', shortcut: 'A', action: () => openModal('aiModal') },
+    { icon: 'fa-headphones', label: 'Âm thanh thư giãn', shortcut: 'S', action: () => openModal('soundModal') },
+    { icon: 'fa-microphone', label: 'Đọc to trang', shortcut: 'T', action: speakCurrentPage },
+    { icon: 'fa-eye', label: 'Phân tích ảnh (AI Vision)', shortcut: 'V', action: analyzeCurrentPage },
+    { icon: 'fa-bookmark', label: 'Đánh dấu trang', shortcut: 'B', action: toggleBookmark },
+    { icon: 'fa-expand', label: 'Toàn màn hình', shortcut: 'F', action: () => { const el = viewerBody.querySelector('.page-img'); if (el) openFullscreen(el); } },
+    { icon: 'fa-moon', label: 'Đổi theme', shortcut: '', action: () => themeBtn.click() },
+    { icon: 'fa-chart-line', label: 'Thống kê', shortcut: '', action: showStats },
+    { icon: 'fa-folder-plus', label: 'Tạo nhóm mới', shortcut: '', action: () => openModal('collectionModal') },
+    { icon: 'fa-keyboard', label: 'Xem phím tắt', shortcut: '?', action: () => openModal('helpModal') },
+    { icon: 'fa-mouse-pointer', label: 'Bật/tắt cursor tùy biến', shortcut: 'C', action: toggleCursor },
+  ];
+
+  function openCmdPalette() {
+    cmdPalette.classList.add('active');
+    cmdInput.value = '';
+    renderCmdResults('');
+    setTimeout(() => cmdInput.focus(), 50);
+  }
+  function closeCmdPalette() { cmdPalette.classList.remove('active'); }
+
+  function renderCmdResults(q) {
+    const filter = q.toLowerCase().trim();
+    const filtered = filter ? CMDS.filter(c => c.label.toLowerCase().includes(filter)) : CMDS;
+    if (!filtered.length) {
+      cmdResults.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--text-3);font-size:0.85rem;">Không tìm thấy lệnh</div>`;
+      return;
+    }
+    cmdResults.innerHTML = filtered.map((c, i) => `
+      <div class="cmd-item ${i === 0 ? 'selected' : ''}" data-cmd="${CMDS.indexOf(c)}">
+        <i class="fas ${c.icon}"></i>
+        <span>${c.label}</span>
+        ${c.shortcut ? `<span class="cmd-shortcut">${c.shortcut}</span>` : ''}
+      </div>
+    `).join('');
+    cmdResults.querySelectorAll('.cmd-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const cmd = CMDS[parseInt(el.dataset.cmd, 10)];
+        closeCmdPalette();
+        setTimeout(() => cmd.action(), 100);
+      });
+    });
+  }
+
+  function toggleCursor() {
+    state.customCursor = !state.customCursor;
+    document.body.classList.toggle('custom-cursor', state.customCursor);
+    toast(`Cursor: ${state.customCursor ? 'BẬT' : 'TẮT'}`, 'info', 1500);
+  }
+
+  function showStats() {
+    const totalPages = state.library.reduce((s, b) => s + b.totalPages, 0);
+    const totalSize = state.library.reduce((s, b) => s + b.size, 0);
+    const readPages = state.library.reduce((s, b) => s + (b.lastReadPage || 0), 0);
+    const marked = state.library.reduce((s, b) => s + b.bookmarks.length, 0);
+    const html = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
+        <div style="background:var(--bg-2);padding:0.85rem;border-radius:12px;border:1px solid var(--border);">
+          <div style="font-size:0.7rem;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;">Truyện</div>
+          <div style="font-size:1.6rem;font-weight:700;color:var(--primary);font-family:'Space Grotesk',sans-serif;">${state.library.length}</div>
+        </div>
+        <div style="background:var(--bg-2);padding:0.85rem;border-radius:12px;border:1px solid var(--border);">
+          <div style="font-size:0.7rem;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;">Tổng trang</div>
+          <div style="font-size:1.6rem;font-weight:700;color:var(--ai);font-family:'Space Grotesk',sans-serif;">${totalPages}</div>
+        </div>
+        <div style="background:var(--bg-2);padding:0.85rem;border-radius:12px;border:1px solid var(--border);">
+          <div style="font-size:0.7rem;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;">Đã đọc</div>
+          <div style="font-size:1.6rem;font-weight:700;color:var(--accent);font-family:'Space Grotesk',sans-serif;">${readPages}</div>
+        </div>
+        <div style="background:var(--bg-2);padding:0.85rem;border-radius:12px;border:1px solid var(--border);">
+          <div style="font-size:0.7rem;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;">Đánh dấu</div>
+          <div style="font-size:1.6rem;font-weight:700;color:var(--gold);font-family:'Space Grotesk',sans-serif;">${marked}</div>
+        </div>
+      </div>
+      <div style="background:var(--bg-2);padding:0.85rem;border-radius:12px;border:1px solid var(--border);margin-bottom:0.75rem;">
+        <div style="font-size:0.7rem;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.4rem;">Thời gian đọc</div>
+        <div style="font-size:1.4rem;font-weight:700;color:var(--text);font-family:'Space Grotesk',sans-serif;">${fmtTime(state.stats.totalReadingTime)}</div>
+      </div>
+      <div style="background:var(--bg-2);padding:0.85rem;border-radius:12px;border:1px solid var(--border);">
+        <div style="font-size:0.7rem;color:var(--text-3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.4rem;">Phiên đọc</div>
+        <div style="font-size:1.4rem;font-weight:700;color:var(--text);font-family:'Space Grotesk',sans-serif;">${state.stats.sessionsCount}</div>
+      </div>
+    `;
+    $('statsContent').innerHTML = html;
+    openModal('statsModal');
+  }
+
+  // ================ IMPORT ================
+  async function processFile(file) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    const baseName = file.name.replace(/\.[^.]+$/, '');
+    let pages = [];
+    if (ext === 'cbz' || ext === 'zip' || ext === 'epub') {
+      const zip = await JSZip.loadAsync(file);
+      const entries = [];
+      zip.forEach((path, entry) => {
+        if (entry.dir) return;
+        const lower = path.toLowerCase();
+        if (lower.includes('meta-inf/') || lower === 'mimetype') return;
+        if (lower.match(/\.(jpe?g|png|gif|webp|bmp|avif)$/)) entries.push(entry);
+      });
+      if (!entries.length) throw new Error('Không tìm thấy ảnh');
+      entries.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+      for (const e of entries) {
+        const blob = await e.async('blob');
+        const url = URL.createObjectURL(blob);
+        pages.push({ type: 'image', data: blob, dataUrl: url, name: e.name, _objectUrl: url });
+      }
+    } else if (ext === 'pdf') {
+      const buf = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+      const pdfBlob = new Blob([buf], { type: 'application/pdf' });
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      for (let i = 1; i <= pdf.numPages; i++) pages.push({ type: 'pdf', pageNumber: i, pdfUrl, name: `Trang ${i}` });
+    } else throw new Error(`Định dạng .${ext} không hỗ trợ`);
+    return {
+      id: uid(), name: baseName, filename: file.name, ext,
+      size: file.size, pages, totalPages: pages.length,
+      addedAt: Date.now(), lastReadPage: 0, bookmarks: [], coverBlob: pages[0] ? pages[0].data : null,
+    };
+  }
+
+  async function importFile(file) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!['cbz', 'zip', 'pdf', 'epub'].includes(ext)) { toast(`.${ext} không hỗ trợ`, 'error'); return; }
+    loadingOverlay.classList.add('active');
+    loadingText.textContent = `Đang xử lý ${file.name}...`;
+    try {
+      const book = await processFile(file);
+      if (book.coverBlob) book._coverUrl = URL.createObjectURL(book.coverBlob);
+      book.pages.forEach(p => { if (p.type === 'image') p._thumbUrl = p.dataUrl; });
+      state.library.push(book);
+      await dbPut(STORE_BOOKS, book);
+      renderLibrary();
+      toast(`Đã thêm "${book.name}" (${book.totalPages} trang)`, 'success');
+      if (state.library.length === 1) openBook(0);
+    } catch (err) {
+      console.error(err);
+      toast('Lỗi: ' + err.message, 'error', 4000);
+    } finally {
+      loadingOverlay.classList.remove('active');
+    }
+  }
+
+  // ================ EVENTS ================
+  fileInput.addEventListener('change', async e => {
+    if (!e.target.files.length) return;
+    const files = Array.from(e.target.files);
+    fileInput.value = '';
+    for (const f of files) await importFile(f);
+  });
+  document.body.addEventListener('dragover', e => e.preventDefault());
+  document.body.addEventListener('drop', async e => {
+    e.preventDefault();
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length) for (const f of files) await importFile(f);
+  });
+
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      $('panel-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+  prevBtn.addEventListener('click', () => goToPage(state.currentPage - 1));
+  nextBtn.addEventListener('click', () => goToPage(state.currentPage + 1));
+  zoomInBtn.addEventListener('click', () => setZoom(state.zoom + 20));
+  zoomOutBtn.addEventListener('click', () => setZoom(state.zoom - 20));
+  fitBtn.addEventListener('click', () => { state.fitMode = 'auto'; state.zoom = 100; applyFit(); updateUI(); });
+  fsBtn.addEventListener('click', () => {
+    const el = viewerBody.querySelector('.page-img');
+    if (el) openFullscreen(el);
+  });
+  bookmarkBtn.addEventListener('click', toggleBookmark);
+  autoScrollBtn.addEventListener('click', toggleAutoScroll);
+  heatmapBtn.addEventListener('click', toggleHeatmap);
+
+  modeSingle.addEventListener('click', () => setReadingMode('single'));
+  modeDouble.addEventListener('click', () => setReadingMode('double'));
+  modeScroll.addEventListener('click', () => setReadingMode('scroll'));
+  modeFocus.addEventListener('click', () => setReadingMode('focus'));
+
+  async function setReadingMode(m) {
+    state.readingMode = m;
+    if (m !== 'scroll' && state.autoScroll) toggleAutoScroll();
+    await renderPage();
+  }
+
+  pageSlider.addEventListener('input', e => {
+    const v = parseInt(e.target.value, 10);
+    if (state.readingMode === 'scroll') {
+      const target = viewerBody.querySelector(`[data-idx="${v}"]`);
+      if (target) target.scrollIntoView({ behavior: 'auto', block: 'start' });
+      state.currentPage = v; updateUI();
+    } else goToPage(v);
+  });
+
+  searchInput.addEventListener('input', e => {
+    state.searchQuery = e.target.value;
+    renderLibrary();
+    renderThumbs();
+  });
+
+  themeBtn.addEventListener('click', () => {
+    const next = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.body.dataset.theme = next;
+    themeBtn.innerHTML = next === 'dark' ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+    localStorage.setItem('lumina-theme-ultra', next);
+  });
+  const savedTheme = localStorage.getItem('lumina-theme-ultra');
+  if (savedTheme) {
+    document.body.dataset.theme = savedTheme;
+    themeBtn.innerHTML = savedTheme === 'dark' ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+  }
+
+  function openModal(id) { $(id).classList.add('active'); }
+  function closeModal(id) { $(id).classList.remove('active'); }
+  document.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', () => closeModal(el.dataset.close)));
+  document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); }));
+
+  helpBtn.addEventListener('click', () => openModal('helpModal'));
+  aiBtn.addEventListener('click', () => openModal('aiModal'));
+  soundBtn.addEventListener('click', () => openModal('soundModal'));
+  $('statsBtn').addEventListener('click', showStats);
+
+  $('aiSend').addEventListener('click', sendAIMessage);
+  $('aiInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendAIMessage(); });
+  state.voiceRecognition = initVoiceRecognition();
+  $('aiVoice').addEventListener('click', () => {
+    if (!state.voiceRecognition) { toast('Không hỗ trợ voice', 'warn'); return; }
+    try { state.voiceRecognition.start(); toast('Đang nghe...', 'ai', 2000); } catch (e) {}
+  });
+
+  document.querySelectorAll('.sound-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const type = btn.dataset.sound;
+      if (type === 'off') {
+        stopSound(); state.soundType = 'off';
+        document.querySelectorAll('.sound-btn').forEach(b => b.classList.remove('active'));
+        updateSoundViz(false);
+        toast('Đã tắt âm thanh', 'info', 1500);
+      } else playSound(type);
+    });
+  });
+  $('volumeSlider').addEventListener('input', e => {
+    const v = e.target.value;
+    $('volumeValue').textContent = v + '%';
+    if (state.soundGain) state.soundGain.gain.value = parseFloat(v) / 100 * 0.5;
+  });
+  $('sleepTimer').addEventListener('change', e => {
+    const min = parseInt(e.target.value, 10);
+    if (state.sleepTimer) { clearTimeout(state.sleepTimer); state.sleepTimer = null; }
+    if (min > 0) {
+      state.sleepTimer = setTimeout(() => {
+        stopSound(); state.soundType = 'off';
+        document.querySelectorAll('.sound-btn').forEach(b => b.classList.remove('active'));
+        updateSoundViz(false);
+        toast('Hết giờ hẹn', 'info');
+      }, min * 60 * 1000);
+      toast(`Hẹn giờ ${min} phút`, 'success');
+    }
+  });
+
+  $('newCollectionBtn').addEventListener('click', () => openModal('collectionModal'));
+  $('collectionCreate').addEventListener('click', async () => {
+    const name = $('collectionNameInput').value.trim();
+    if (!name) { toast('Nhập tên nhóm', 'warn'); return; }
+    const col = { id: uid(), name, bookIds: [], createdAt: Date.now() };
+    state.collections.push(col);
+    await dbPut(STORE_COLLECTIONS, col);
+    $('collectionNameInput').value = '';
+    closeModal('collectionModal');
+    renderLibrary();
+    toast(`Đã tạo "${name}"`, 'success');
+  });
+
+  // Cmd palette
+  cmdInput.addEventListener('input', e => renderCmdResults(e.target.value));
+  cmdInput.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeCmdPalette();
+    if (e.key === 'Enter') {
+      const selected = cmdResults.querySelector('.cmd-item.selected');
+      if (selected) selected.click();
+    }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      const items = cmdResults.querySelectorAll('.cmd-item');
+      const cur = cmdResults.querySelector('.cmd-item.selected');
+      let idx = Array.from(items).indexOf(cur);
+      idx = e.key === 'ArrowDown' ? (idx + 1) % items.length : (idx - 1 + items.length) % items.length;
+      items.forEach(i => i.classList.remove('selected'));
+      items[idx].classList.add('selected');
+      items[idx].scrollIntoView({ block: 'nearest' });
+    }
+  });
+  cmdPalette.addEventListener('click', e => { if (e.target === cmdPalette) closeCmdPalette(); });
+
+  // Keyboard
+  window.addEventListener('keydown', e => {
+    // Cmd palette
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      openCmdPalette();
+      return;
+    }
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+    if (e.key === 'Escape') {
+      if (cmdPalette.classList.contains('active')) { closeCmdPalette(); return; }
+      document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+      closeFullscreen();
+      return;
+    }
+    if (e.key === '?' || (e.shiftKey && e.key === '/')) { e.preventDefault(); openModal('helpModal'); return; }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goToPage(state.currentPage - 1); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); goToPage(state.currentPage + 1); }
+    else if (e.key === 'Home') { e.preventDefault(); goToPage(0); }
+    else if (e.key === 'End') { e.preventDefault(); goToPage(Infinity); }
+    else if (e.key === '+' || e.key === '=') { e.preventDefault(); setZoom(state.zoom + 15); }
+    else if (e.key === '-') { e.preventDefault(); setZoom(state.zoom - 15); }
+    else if (e.key === '0') { e.preventDefault(); state.fitMode = 'auto'; state.zoom = 100; applyFit(); updateUI(); }
+    else if (e.key === 'b' || e.key === 'B') { e.preventDefault(); toggleBookmark(); }
+    else if (e.key === '1') { e.preventDefault(); setReadingMode('single'); }
+    else if (e.key === '2') { e.preventDefault(); setReadingMode('double'); }
+    else if (e.key === '3') { e.preventDefault(); setReadingMode('scroll'); }
+    else if (e.key === '4') { e.preventDefault(); setReadingMode('focus'); }
+    else if (e.key === '5') { e.preventDefault(); toggleAutoScroll(); }
+    else if (e.key === 'h' || e.key === 'H') { e.preventDefault(); toggleHeatmap(); }
+    else if (e.key === 'f' || e.key === 'F') {
+      e.preventDefault();
+      const el = viewerBody.querySelector('.page-img');
+      if (el) openFullscreen(el);
+    }
+    else if (e.key === 'a' || e.key === 'A') { e.preventDefault(); openModal('aiModal'); }
+    else if (e.key === 's' || e.key === 'S') { e.preventDefault(); openModal('soundModal'); }
+    else if (e.key === 't' || e.key === 'T') { e.preventDefault(); speakCurrentPage(); }
+    else if (e.key === 'v' || e.key === 'V') { e.preventDefault(); analyzeCurrentPage(); }
+    else if (e.key === 'c' || e.key === 'C') { e.preventDefault(); toggleCursor(); }
+  });
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (state.currentBook !== null && state.readingMode !== 'scroll') applyFit();
+      if (state.heatmapOn) renderHeatmap();
+    }, 200);
+  });
+
+  // Track reading time
+  setInterval(() => {
+    if (state.currentBook !== null && document.visibilityState === 'visible') {
+      state.stats.totalReadingTime += 5;
+      saveStats();
+    }
+  }, 5000);
+
+  // Scroll listener for scroll mode
+  viewerBody.addEventListener('scroll', () => {
+    if (state.readingMode !== 'scroll') return;
+    const imgs = viewerBody.querySelectorAll('.page-img[data-idx]');
+    const center = viewerBody.scrollTop + viewerBody.clientHeight / 2;
+    for (const img of imgs) {
+      const top = img.offsetTop;
+      const bottom = top + img.offsetHeight;
+      if (center >= top && center < bottom) {
+        const idx = parseInt(img.dataset.idx, 10);
+        if (idx !== state.currentPage) {
+          state.currentPage = idx;
+          state.library[state.currentBook].lastReadPage = idx;
+          state.pageHeatmap[idx] = (state.pageHeatmap[idx] || 0) + 1;
+          updateUI();
+          saveProgressDebounced(state.library[state.currentBook]);
+        }
+        break;
+      }
+    }
+  });
+
+  // ================ INIT ================
+  async function init() {
+    try {
+      await openDB();
+      const [books, cols, statsArr] = await Promise.all([
+        dbGetAll(STORE_BOOKS), dbGetAll(STORE_COLLECTIONS), dbGetAll(STORE_STATS)
+      ]);
+      books.sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
+      for (const b of books) {
+        if (b.coverBlob) b._coverUrl = URL.createObjectURL(b.coverBlob);
+        if (b.pages) for (const p of b.pages) {
+          if (p.type === 'image' && p.data) {
+            p.dataUrl = URL.createObjectURL(p.data);
+            p._thumbUrl = p.dataUrl;
+          }
+        }
+      }
+      state.library = books;
+      state.collections = cols;
+      if (statsArr.length) state.stats = { ...state.stats, ...statsArr[0] };
+      renderLibrary();
+      if (books.length) toast(`Đã tải ${books.length} truyện`, 'info', 2000);
+      else toast('Chào mừng đến Lumina Reader AI ULTRA!', 'ai', 3500);
+    } catch (e) {
+      console.error('DB error:', e);
+      toast('Không thể khởi tạo', 'warn');
+    }
+    updateUI();
+    // Welcome tip
+    setTimeout(() => {
+      if (state.library.length) toast('Nhấn Ctrl+K để mở Command Palette', 'ai', 4000);
+    }, 2000);
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
